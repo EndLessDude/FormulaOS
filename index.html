@@ -1,141 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Race OS</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RaceOS — Pit Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Titillium+Web:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-        <div id="desktop">
+<!-- ===================================================================
+     IGNITION SCREEN — covers everything until the user starts RaceOS
+=================================================================== -->
+<div id="ignition-screen">
 
-            <!-- Wallpaper -->
-            <div id="wallpaper">
-                <div class="wallpaper-grid"></div>
-                <div class="wallpaper-glow"></div>
-                <div class="wallpaper-trackline"></div>               
-        </div>
+  <div class="ignition-bg">
+    <div class="ignition-grid"></div>
+    <div class="ignition-glow"></div>
+  </div>
 
-        <!-- Top Bar -->
-        <header id="topbar">
-            <div class="topbar-left">
-                <span class="topbar-logo">Race<span class="accent">OS</span></span>
-                <span class="topbar-divider">|</span>
-                <span class="topbar-status"><span class="status-dot"></span>SYSTEM NOMINAL</span>
-            </div>
-            <div class="top-right">
-                <span class="topbar-session">Next Race weekend: July, 5</span>
-                <span class="topbar-divider">|</span>
-                <span id="clock" class="topbar-clock">00:00:00</span>
-            </div>
-        </header>
+  <!-- Stage 1: ignition button -->
+  <div class="ignition-stage" id="stage-start">
+    <div class="dial-wrap">
+      <svg viewBox="0 0 240 240" class="dial-svg">
+        <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(241,242,244,0.08)" stroke-width="2"/>
+        <circle cx="120" cy="120" r="104" fill="none" stroke="var(--red)" stroke-width="2"
+                stroke-dasharray="20 8" opacity="0.5"/>
+        <!-- tick marks -->
+        <g stroke="rgba(241,242,244,0.35)" stroke-width="2">
+          <line x1="120" y1="20" x2="120" y2="34"/>
+          <line x1="120" y1="220" x2="120" y2="206"/>
+          <line x1="20" y1="120" x2="34" y2="120"/>
+          <line x1="220" y1="120" x2="206" y2="120"/>
+        </g>
+        <text x="120" y="46" text-anchor="middle" class="dial-label">RPM</text>
+      </svg>
+      <button id="ignition-btn" aria-label="Start RaceOS">
+        <span class="ignition-btn-ring"></span>
+        <span class="ignition-btn-core">
+          <svg viewBox="0 0 40 40" class="ignition-icon">
+            <path d="M20 4 V20 L30 26" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="3"/>
+          </svg>
+          <span class="ignition-btn-text">START<br>RACEOS</span>
+        </span>
+      </button>
+    </div>
+    <p class="ignition-hint">PRESS TO FIRE THE ENGINE</p>
+  </div>
 
-        <!-- Desktop Icons -->
-        <div id="icon-layer">
+  <!-- Stage 2: boot sequence -->
+  <div class="ignition-stage" id="stage-boot" hidden>
+    <div class="boot-panel">
+      <div class="boot-tacho">
+        <svg viewBox="0 0 200 120" class="tacho-svg">
+          <path d="M12 108 A88 88 0 0 1 188 108" fill="none" stroke="rgba(241,242,244,0.08)" stroke-width="10"/>
+          <path id="tacho-fill" d="M12 108 A88 88 0 0 1 188 108" fill="none" stroke="var(--red)" stroke-width="10"
+                stroke-dasharray="276" stroke-dashoffset="276"/>
+          <line id="tacho-needle" x1="100" y1="108" x2="100" y2="30" stroke="var(--cyan)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="108" r="6" fill="var(--white)"/>
+        </svg>
+      </div>
+      <div class="boot-log" id="boot-log"></div>
+      <div class="boot-progress"><div class="boot-progress-fill" id="boot-progress-fill"></div></div>
+    </div>
+  </div>
 
-            <div class="desktop-icon" id="icon-welsome" data-window="welcome">
-                <div class="icon-shape">
-                    <svg viewBox="0 0 64" class="icon-glyph">
-                        <path d="M32 6 C20 6 12 16 12 28 C12 40 20 50 32 50 C44 50 52 40 52 28 C52 16 44 6 32 6 Z" fill="none" stroke="currentColor" stroke-width="3"/>
-                        <path d="M12 28 H52 M32 6 V50" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                        <rect x="24" y="50" width="16" height="8" fill="currentColor" opacity="0.85"/>
-                    </svg>
-                </div>
-                <span class="icon-label">Welcome</span>
-            </div>
+  <!-- Stage 3: clock format prompt -->
+  <div class="ignition-stage" id="stage-format" hidden>
+    <div class="format-panel">
+      <div class="welcome-eyebrow">DASH CONFIGURATION</div>
+      <h2 class="format-title">Set your clock format</h2>
+      <p class="format-sub">This controls how the live clock reads on the pit wall top bar.</p>
+      <div class="format-options">
+        <button class="format-btn" data-format="12">
+          <span class="format-btn-time">7:04 PM</span>
+          <span class="format-btn-label">12-HOUR</span>
+        </button>
+        <button class="format-btn" data-format="24">
+          <span class="format-btn-time">19:04</span>
+          <span class="format-btn-label">24-HOUR</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-            <div class="desktop-icon" id="icon-garage" data-window="garage">
-                <div class="icon-shape">
-                    <svg viewBox="0 0 64 64" class="icon-glyph">
-                        <circle cx="20" cy="44" r="6" fill="none" stroke="currentColor" stroke-width="3"/>
-                        <circle cx="44" cy="44" r="6" fill="none" stroke="currentColor" stroke-width="3"/>
-                        <path d="M10 44 L14 26 16 H40 L50 26 L54 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
-                        <path d="M18 30 H46" stroke="currentColor" stroke-width="2" opacity="0.6"/>
-                    </svg>
-                </div>
-                <span class="icon-label">Garage</span>
-            </div>
+</div>
 
-        </div>
+<!-- ===================================================================
+     DESKTOP
+=================================================================== -->
+<div id="desktop">
 
-        <!-- Window: Welcome -->
-         <section class="window" id="welcome">
-            <div class="window-header" id="welcomeheader">
-                <span class="headertext">Welcome.SYS - Driver Driefing</span>
-                <div class="closebutton" data-target="welcome">&times;</div>
-            </div>
-            <div class="windowcontent welcome-content">
+  <!-- Wallpaper: Silverstone circuit layout + race countdown -->
+  <div id="wallpaper">
+    <div class="wallpaper-grid"></div>
+    <div class="wallpaper-glow"></div>
 
-                <div class="welcome-hero">
-                    <div class="welcome-eyebrow">RaceOS // Boot Sequence complete</div>
-                    <h1 class="welcome-title">Welcome to <span class="accent">RaceOS</span></h1>
-                    <p class="welcome-sub">A personal control system built for the pit wall - not the boardroom.</p>
-                </div>
+    <svg id="track-svg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice">
+      <path class="track-ribbon" d="M120,420 C60,380 60,300 130,270 C190,244 210,190 180,140
+        C150,90 200,40 270,55 C330,68 350,120 400,120 C460,120 470,60 540,50
+        C610,40 660,90 630,140 C605,182 640,210 700,215 C775,222 830,180 860,230
+        C892,283 850,330 780,335 C715,340 690,300 640,320 C585,342 590,400 530,410
+        C470,420 460,370 400,375 C335,381 330,440 260,445 C190,450 175,455 120,420 Z"/>
+      <path class="track-centerline" d="M120,420 C60,380 60,300 130,270 C190,244 210,190 180,140
+        C150,90 200,40 270,55 C330,68 350,120 400,120 C460,120 470,60 540,50
+        C610,40 660,90 630,140 C605,182 640,210 700,215 C775,222 830,180 860,230
+        C892,283 850,330 780,335 C715,340 690,300 640,320 C585,342 590,400 530,410
+        C470,420 460,370 400,375 C335,381 330,440 260,445 C190,450 175,455 120,420 Z"/>
+      <text x="145" y="405" class="track-label">CLUB</text>
+      <text x="120" y="230" class="track-label">MAGGOTTS–BECKETTS</text>
+      <text x="330" y="45" class="track-label">COPSE</text>
+      <text x="640" y="115" class="track-label">HANGAR STRAIGHT</text>
+      <text x="800" y="255" class="track-label">STOWE</text>
+    </svg>
 
-                <div class="welcome-grid">
+    <div class="race-countdown" id="race-countdown">
+      <div class="countdown-eyebrow">NEXT SESSION</div>
+      <div class="countdown-session">FREE PRACTICE 1 <span class="accent">·</span> SILVERSTONE</div>
+      <div class="countdown-clock">
+        <div class="countdown-unit"><span id="cd-days">00</span><label>DAYS</label></div>
+        <div class="countdown-unit"><span id="cd-hours">00</span><label>HRS</label></div>
+        <div class="countdown-unit"><span id="cd-mins">00</span><label>MIN</label></div>
+        <div class="countdown-unit"><span id="cd-secs">00</span><label>SEC</label></div>
+      </div>
+    </div>
+  </div>
 
-                    <div class="welcome-card">
-                        <span class="card-tag">Driver Profile</span>
-                        <h3>Car #44 - Pit Lane Operator</h3>
-                        <p>Logged in from the home garage. Telementry nominal, tires scrubbed in, radio check complete.</p>
-                    </div>
-                </div>
-                <div class="welcome-card">
-                    <span class="card-tag">Current Team</span>
-                    <h3>Privateer Entry</h3>
-                    <p>Independent build, no factory backing - evenry line of this OS is hand tuned in-house.</p>
-                </div>
+  <!-- Top Bar -->
+  <header id="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">RACE<span class="accent">OS</span></span>
+      <span class="topbar-divider">|</span>
+      <span class="topbar-status"><span class="status-dot"></span>SYSTEMS NOMINAL</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-session">BRITISH GP WEEKEND — SILVERSTONE</span>
+      <span class="topbar-divider">|</span>
+      <span id="clock" class="topbar-clock">00:00:00</span>
+    </div>
+  </header>
 
-                <div class="welcome-card">
-                    <span class="card-tag">Favorite Cars</span>
-                    <h3>GT3 &amp; Hypercar Class</h3>
-                    <p>Endurance machines over outright pace - balance, reliability, and a car you can trust at 3am.</p>
-                </div>
+  <!-- Desktop Icons -->
+  <div id="icon-layer">
 
-                <div class="welcome-card">
-                    <span class="card-tag">Racing Philosophy</span>
-                    <h3>Driven by Performance</h3>
-                    <p>“If youre going to push a piece of machinery to the limit, and expect it to hold together, you have to have some sense of where that limit is.”</p>
-                </div>
-
-            </div>
-
-            <div class="welcome-footer">
-                <span class="footer-readout">Throttle 0%</span>
-                <span class="footer-readout">Brake 0%</span>
-                <span class="footer-readout">Gear N</span>
-                <span class="footer-readout">Open <strong>Garage</strong> To continue</span>
-            </div>
-        </div>
-        </section>
-
-        <!--Window: Garage -->
-        <section class="window" id="garage">
-            <div class="windowheader" id="garageheader">
-                <span class="headertext">Garage.app - Car Collection</span>
-                <div class="closebutton" data-target="garage">&times;</div>
-            </div>
-            <div class="windowcontent garage-content">
-
-                <nav class="garage-sidebar" id="garage-sidebar">
-                    <!--Populated by Script.js-->
-                </nav>
-
-                <div class="garage-display" id="garage-display">
-                    <!--populated dynamically by script.js-->
-                </div>
-
-            </div>
-        </section>
-
+    <div class="desktop-icon" id="icon-welcome" data-window="welcome">
+      <div class="icon-shape">
+        <svg viewBox="0 0 64 64" class="icon-glyph">
+          <path d="M32 6 C20 6 12 16 12 28 C12 40 20 50 32 50 C44 50 52 40 52 28 C52 16 44 6 32 6 Z" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M12 28 H52 M32 6 V50" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+          <rect x="24" y="50" width="16" height="8" rx="1" fill="currentColor" opacity="0.85"/>
+        </svg>
+      </div>
+      <span class="icon-label">Welcome</span>
     </div>
 
-    <script src="script.js"></script>
-    </body>
-    </html>
+    <div class="desktop-icon" id="icon-garage" data-window="garage">
+      <div class="icon-shape">
+        <svg viewBox="0 0 64 64" class="icon-glyph">
+          <circle cx="20" cy="44" r="6" fill="none" stroke="currentColor" stroke-width="3"/>
+          <circle cx="44" cy="44" r="6" fill="none" stroke="currentColor" stroke-width="3"/>
+          <path d="M10 44 L14 26 L24 16 H40 L50 26 L54 44" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M18 30 H46" stroke="currentColor" stroke-width="2" opacity="0.6"/>
+        </svg>
+      </div>
+      <span class="icon-label">Garage</span>
+    </div>
 
-        
+    <div class="desktop-icon" id="icon-devlog" data-window="devlog">
+      <div class="icon-shape">
+        <svg viewBox="0 0 64 64" class="icon-glyph">
+          <rect x="14" y="10" width="36" height="44" rx="2" fill="none" stroke="currentColor" stroke-width="3"/>
+          <line x1="21" y1="22" x2="43" y2="22" stroke="currentColor" stroke-width="2.5"/>
+          <line x1="21" y1="31" x2="43" y2="31" stroke="currentColor" stroke-width="2.5" opacity="0.7"/>
+          <line x1="21" y1="40" x2="35" y2="40" stroke="currentColor" stroke-width="2.5" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="icon-label">Devlog</span>
+    </div>
+
+  </div>
+
+  <!-- ===================== WINDOW: WELCOME ===================== -->
+  <section class="window" id="welcome">
+    <div class="windowheader" id="welcomeheader">
+      <span class="headertext">WELCOME.SYS — DRIVER BRIEFING</span>
+      <div class="closebutton" data-target="welcome">&times;</div>
+    </div>
+    <div class="windowcontent welcome-content">
+
+      <div class="welcome-hero">
+        <div class="welcome-eyebrow">RACEOS // BOOT SEQUENCE COMPLETE</div>
+        <h1 class="welcome-title">Welcome to <span class="accent">RaceOS</span></h1>
+        <p class="welcome-sub">A personal control system built for the pit wall — not the boardroom.</p>
+      </div>
+
+      <div class="welcome-grid">
+
+        <div class="welcome-card">
+          <span class="card-tag">DRIVER PROFILE</span>
+          <h3>Car #44 — Pit Lane Operator</h3>
+          <p>Logged in from the home garage. Telemetry nominal, tires scrubbed in, radio check complete.</p>
+        </div>
+
+        <div class="welcome-card">
+          <span class="card-tag">CURRENT TEAM</span>
+          <h3>Privateer Entry</h3>
+          <p>Independent build, no factory backing — every line of this OS is hand-tuned in-house.</p>
+        </div>
+
+        <div class="welcome-card">
+          <span class="card-tag">FAVORITE CARS</span>
+          <h3>GT3 &amp; Hypercar Class</h3>
+          <p>Endurance machines over outright pace — balance, reliability, and a car you can trust at 3am.</p>
+        </div>
+
+        <div class="welcome-card">
+          <span class="card-tag">RACING PHILOSOPHY</span>
+          <h3>Smooth is fast.</h3>
+          <p>Win the corner you're in before chasing the next one. The same applies to building software.</p>
+        </div>
+
+      </div>
+
+      <div class="welcome-footer">
+        <span class="footer-readout">THROTTLE 0%</span>
+        <span class="footer-readout">BRAKE 0%</span>
+        <span class="footer-readout">GEAR N</span>
+        <span class="footer-readout">OPEN <strong>GARAGE</strong> TO CONTINUE</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== WINDOW: GARAGE ===================== -->
+  <section class="window" id="garage">
+    <div class="windowheader" id="garageheader">
+      <span class="headertext">GARAGE.APP — CAR COLLECTION</span>
+      <div class="closebutton" data-target="garage">&times;</div>
+    </div>
+    <div class="windowcontent garage-content-wrap">
+
+      <div class="garage-toolbar">
+        <span class="toolbar-label">YOUR GARAGE — <span id="garage-count">1</span> CAR(S)</span>
+        <button class="btn-add-car" id="btn-add-car">+ ADD CAR</button>
+      </div>
+
+      <div class="garage-body">
+        <nav class="garage-sidebar" id="garage-sidebar">
+          <!-- populated dynamically by script.js -->
+        </nav>
+
+        <div class="garage-display" id="garage-display">
+          <!-- populated dynamically by script.js -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== WINDOW: ADD CAR ===================== -->
+  <section class="window" id="addcar">
+    <div class="windowheader" id="addcarheader">
+      <span class="headertext">ADD CAR — GARAGE.APP</span>
+      <div class="closebutton" data-target="addcar">&times;</div>
+    </div>
+    <div class="windowcontent addcar-content">
+
+      <div class="addcar-tabs">
+        <button class="addcar-tab active" data-tab="custom">CUSTOM BUILD</button>
+        <button class="addcar-tab" data-tab="browse">BROWSE COLLECTION</button>
+      </div>
+
+      <div class="addcar-panel active" id="panel-custom">
+        <div class="form-row">
+          <label for="input-name">Car name</label>
+          <input type="text" id="input-name" placeholder="e.g. Nissan GT-R NISMO GT3">
+        </div>
+        <div class="form-row form-row-split">
+          <div>
+            <label for="input-class">Class</label>
+            <select id="input-class">
+              <option>GT3 — Endurance</option>
+              <option>GT3 — Sprint</option>
+              <option>GT3 — All-rounder</option>
+              <option>GTE — Endurance</option>
+              <option>Hypercar — LMDh</option>
+              <option>Prototype — Open</option>
+            </select>
+          </div>
+          <div>
+            <label for="input-power">Power (HP)</label>
+            <input type="number" id="input-power" placeholder="550">
+          </div>
+        </div>
+        <div class="form-row form-row-split">
+          <div>
+            <label for="input-weight">Weight (KG)</label>
+            <input type="number" id="input-weight" placeholder="1280">
+          </div>
+          <div>
+            <label for="input-topspeed">Top speed (MPH)</label>
+            <input type="number" id="input-topspeed" placeholder="185">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="input-notes">Notes</label>
+          <textarea id="input-notes" rows="3" placeholder="Setup notes, character, history..."></textarea>
+        </div>
+        <button class="btn-primary" id="submit-custom-car">ADD TO GARAGE</button>
+      </div>
+
+      <div class="addcar-panel" id="panel-browse">
+        <div class="browse-grid" id="browse-grid">
+          <!-- populated dynamically by script.js -->
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== WINDOW: DEVLOG ===================== -->
+  <section class="window" id="devlog">
+    <div class="windowheader" id="devlogheader">
+      <span class="headertext">DEVLOG.LOG — BUILD HISTORY</span>
+      <div class="closebutton" data-target="devlog">&times;</div>
+    </div>
+    <div class="windowcontent devlog-content">
+
+      <nav class="garage-sidebar" id="devlog-sidebar">
+        <!-- populated dynamically by script.js -->
+      </nav>
+
+      <div class="garage-display" id="devlog-display">
+        <!-- populated dynamically by script.js -->
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

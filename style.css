@@ -1,4 +1,6 @@
-/* Styleshee for the Pit Wall
+/* =========================================================
+   RaceOS — Pit Wall Stylesheet
+   Tokens:
    --black     #0a0a0d   primary background
    --charcoal  #16161b   secondary surface
    --panel     #1d1e24   raised panel / window body
@@ -7,7 +9,7 @@
    --red       #e2061c   accent — Ferrari red
    --cyan      #2fe6e0   telemetry cyan
    --yellow    #ffc400   racing yellow (sparing)
-*/
+   ========================================================= */
 
 :root {
   --black: #0a0a0d;
@@ -26,47 +28,312 @@
   --mono-font: 'JetBrains Mono', monospace;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html, body{
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: var(--black);
   font-family: var(--body-font);
-  background-color: var(--black);
   color: var(--white);
   -webkit-font-smoothing: antialiased;
 }
 
-#desktop {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+button, input, select, textarea { font-family: inherit; }
+
+/* =========================================================
+   IGNITION SCREEN
+========================================================= */
+
+#ignition-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--black);
+  transition: opacity 0.6s ease;
 }
 
-/* Wallpaper */
+#ignition-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ignition-bg { position: absolute; inset: 0; overflow: hidden; }
+
+.ignition-grid {
+  position: absolute;
+  inset: -2px;
+  background-image:
+    linear-gradient(to right, rgba(241,242,244,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(241,242,244,0.03) 1px, transparent 1px);
+  background-size: 46px 46px;
+}
+
+.ignition-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 700px;
+  height: 700px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(226, 6, 28, 0.14) 0%, rgba(226,6,28,0) 68%);
+}
+
+.ignition-stage {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+/* ---- Stage 1: ignition button ---- */
+
+.dial-wrap {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dial-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.dial-label {
+  font-family: var(--mono-font);
+  font-size: 9px;
+  fill: var(--muted);
+  letter-spacing: 0.15em;
+}
+
+#ignition-btn {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  border-radius: 50%;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ignition-btn-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  box-shadow: 0 0 24px rgba(226, 6, 28, 0.45), inset 0 0 24px rgba(226, 6, 28, 0.2);
+  animation: ring-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes ring-pulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(226,6,28,0.45), inset 0 0 24px rgba(226,6,28,0.2); }
+  50% { box-shadow: 0 0 40px rgba(226,6,28,0.7), inset 0 0 32px rgba(226,6,28,0.35); }
+}
+
+.ignition-btn-core {
+  position: absolute;
+  inset: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2a2b32, #131318 75%);
+  border: 1px solid rgba(241,242,244,0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--white);
+  transition: transform 0.12s ease;
+}
+
+#ignition-btn:hover .ignition-btn-core { transform: scale(1.03); }
+#ignition-btn:active .ignition-btn-core { transform: scale(0.96); }
+
+.ignition-icon { width: 30px; height: 30px; color: var(--red); }
+
+.ignition-btn-text {
+  font-family: var(--display-font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+}
+
+.ignition-hint {
+  font-family: var(--mono-font);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--muted);
+}
+
+/* ---- Stage 2: boot sequence ---- */
+
+.boot-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.tacho-svg { width: 220px; height: 132px; }
+
+#tacho-fill {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+#tacho-needle {
+  transform-origin: 100px 108px;
+  transition: transform 0.3s ease;
+}
+
+.boot-log {
+  width: 100%;
+  min-height: 132px;
+  font-family: var(--mono-font);
+  font-size: 12px;
+  color: var(--cyan);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.boot-log-line {
+  opacity: 0;
+  transform: translateY(4px);
+  animation: log-in 0.25s ease forwards;
+}
+
+.boot-log-line.ok::after {
+  content: " OK";
+  color: var(--white);
+  opacity: 0.6;
+}
+
+@keyframes log-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.boot-progress {
+  width: 100%;
+  height: 4px;
+  background: rgba(241,242,244,0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.boot-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--red), var(--yellow));
+  transition: width 0.3s ease;
+}
+
+/* ---- Stage 3: clock format prompt ---- */
+
+.format-panel {
+  width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.format-title {
+  font-family: var(--display-font);
+  font-size: 26px;
+  font-weight: 700;
+  margin: 4px 0 0;
+}
+
+.format-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 14px;
+  max-width: 320px;
+}
+
+.format-options {
+  display: flex;
+  gap: 14px;
+}
+
+.format-btn {
+  width: 150px;
+  padding: 18px 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--white);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+.format-btn:hover {
+  border-color: var(--red);
+  background: var(--panel-2);
+  transform: translateY(-2px);
+}
+
+.format-btn-time {
+  font-family: var(--mono-font);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.format-btn-label {
+  font-family: var(--display-font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+#desktop {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------
+   WALLPAPER — Silverstone circuit + race countdown
+--------------------------------------------------------- */
 
 #wallpaper {
-    position: absolute;
-    inset: 0;
-    background: 
+  position: absolute;
+  inset: 0;
+  background:
     repeating-linear-gradient(45deg, #0d0d11 0px, #0d0d11 2px, #111114 2px, #111114 4px),
     linear-gradient(160deg, #0b0b0e 0%, #08080a 60%, #050506 100%);
-    z-index: 0;
+  z-index: 0;
 }
 
 .wallpaper-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
+  position: absolute;
+  inset: 0;
+  background-image:
     linear-gradient(to right, rgba(241,242,244,0.025) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(241,242,244,0.025) 1px, transparent 1px);
-    background-size: 48px 48px;
+  background-size: 48px 48px;
 }
 
 .wallpaper-glow {
@@ -79,19 +346,95 @@ html, body{
   pointer-events: none;
 }
 
-.wallpaper-trackline {
+#track-svg {
   position: absolute;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
-  height: 42%;
-  background:
-    linear-gradient(to top, rgba(47, 230, 224, 0.05), transparent 100%);
-  border-top: 1px solid rgba(47, 230, 224, 0.08);
-  pointer-events: none;
+  height: 100%;
+  opacity: 0.9;
 }
 
-/* Top bar */
+.track-ribbon {
+  fill: none;
+  stroke: rgba(241, 242, 244, 0.055);
+  stroke-width: 14;
+  stroke-linejoin: round;
+}
+
+.track-centerline {
+  fill: none;
+  stroke: rgba(226, 6, 28, 0.16);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 8;
+}
+
+.track-label {
+  font-family: var(--mono-font);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  fill: rgba(241, 242, 244, 0.16);
+}
+
+.race-countdown {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  padding: 16px 20px;
+  background: rgba(13, 13, 16, 0.55);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--red);
+  border-radius: 6px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.countdown-eyebrow {
+  font-family: var(--mono-font);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+  margin-bottom: 4px;
+}
+
+.countdown-session {
+  font-family: var(--display-font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+}
+
+.countdown-clock {
+  display: flex;
+  gap: 16px;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.countdown-unit span {
+  font-family: var(--mono-font);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+
+.countdown-unit label {
+  font-family: var(--mono-font);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------------
+   TOP BAR
+--------------------------------------------------------- */
 
 #topbar {
   position: absolute;
@@ -124,11 +467,11 @@ html, body{
   letter-spacing: 0.08em;
 }
 
-.accent {color: var(--red);}
+.accent { color: var(--red); }
 
 .topbar-divider {
-    color: var(--border);
-    font-weight: 300;
+  color: var(--border);
+  font-weight: 300;
 }
 
 .topbar-status {
@@ -150,8 +493,8 @@ html, body{
 }
 
 @keyframes pulse-dot {
-  0%, 100% {opacity: 1; }
-  50% {opacity: 0.35; }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }
 
 .topbar-session {
@@ -166,11 +509,13 @@ html, body{
   font-weight: 500;
   color: var(--white);
   letter-spacing: 0.05em;
-  min-width: 78px;
+  min-width: 88px;
   text-align: right;
 }
 
-/* Desktop Icons */
+/* ---------------------------------------------------------
+   DESKTOP ICONS
+--------------------------------------------------------- */
 
 #icon-layer {
   position: absolute;
@@ -206,8 +551,8 @@ html, body{
 }
 
 .icon-glyph {
-    width: 32px;
-    height: 32px;
+  width: 32px;
+  height: 32px;
 }
 
 .icon-label {
@@ -221,8 +566,8 @@ html, body{
 }
 
 .desktop-icon:hover .icon-shape {
-    color: var(--white);
-    border-color: rgba(241, 242, 244, 0.2);
+  color: var(--white);
+  border-color: rgba(241, 242, 244, 0.2);
 }
 
 .desktop-icon.selected .icon-shape {
@@ -233,10 +578,12 @@ html, body{
 }
 
 .desktop-icon.selected .icon-label {
-    color: var(--white);
+  color: var(--white);
 }
 
-/* Windows */
+/* ---------------------------------------------------------
+   WINDOWS
+--------------------------------------------------------- */
 
 .window {
   position: absolute;
@@ -246,7 +593,7 @@ html, body{
   height: 460px;
   top: 100px;
   left: 160px;
-  background: rgba(24, 25, 30, 0.78);
+  background: rgba(24, 25, 30, 0.86);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--border);
@@ -256,18 +603,10 @@ html, body{
   z-index: 100;
 }
 
-#welcome {
-    top: 88px;
-    left: 140px;
-    width: 660px;
-    height: 480px;
-}
-#garage {
-    top: 130px;
-    left: 220px;
-    width: 700px;
-    height: 480px;
-}
+#welcome { top: 88px;  left: 130px; width: 660px; height: 480px; }
+#garage  { top: 120px; left: 200px; width: 720px; height: 500px; }
+#addcar  { top: 96px;  left: 300px; width: 460px; height: 520px; }
+#devlog  { top: 140px; left: 260px; width: 660px; height: 470px; }
 
 .windowheader {
   height: 38px;
@@ -292,17 +631,7 @@ html, body{
   background: var(--red);
 }
 
-.windowheader::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--red);
-}
-
-.windowheader:active {cursor: grabbing;}
+.windowheader:active { cursor: grabbing; }
 
 .headertext {
   font-family: var(--mono-font);
@@ -335,13 +664,18 @@ html, body{
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  min-height: 0;
 }
 
-.windowcontent::-webkit-scrollbar { width: 8px; }
+.windowcontent::-webkit-scrollbar,
+.garage-sidebar::-webkit-scrollbar,
+.garage-display::-webkit-scrollbar { width: 8px; }
 .windowcontent::-webkit-scrollbar-track { background: transparent; }
 .windowcontent::-webkit-scrollbar-thumb { background: var(--panel-2); border-radius: 4px; }
 
-/* Welcome Window */
+/* ---------------------------------------------------------
+   WELCOME WINDOW CONTENT
+--------------------------------------------------------- */
 
 .welcome-content {
   display: flex;
@@ -431,11 +765,58 @@ html, body{
   font-weight: 700;
 }
 
-/* Garage Window */
+/* ---------------------------------------------------------
+   GARAGE WINDOW CONTENT
+--------------------------------------------------------- */
 
-.garage-content {
+.garage-content-wrap {
   display: flex;
+  flex-direction: column;
   height: 100%;
+}
+
+.garage-toolbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.14);
+}
+
+.toolbar-label {
+  font-family: var(--mono-font);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.toolbar-label #garage-count {
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.btn-add-car {
+  font-family: var(--display-font);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  background: var(--red);
+  border: none;
+  border-radius: 4px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-add-car:hover { background: #ff1a30; transform: translateY(-1px); }
+
+.garage-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
 }
 
 .garage-sidebar {
@@ -546,15 +927,192 @@ html, body{
   color: #c7c9d1;
 }
 
-/* Responsive Styles */
+/* ---------------------------------------------------------
+   ADD CAR WINDOW CONTENT
+--------------------------------------------------------- */
+
+.addcar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.addcar-tabs {
+  flex-shrink: 0;
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.addcar-tab {
+  flex: 1;
+  padding: 12px 8px;
+  background: rgba(0,0,0,0.14);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-family: var(--display-font);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.addcar-tab:hover { color: var(--white); }
+
+.addcar-tab.active {
+  color: var(--white);
+  border-bottom-color: var(--red);
+  background: rgba(226, 6, 28, 0.06);
+}
+
+.addcar-panel {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 24px;
+}
+
+.addcar-panel.active { display: block; }
+
+.form-row { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }
+
+.form-row-split {
+  flex-direction: row;
+  gap: 14px;
+}
+
+.form-row-split > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row label {
+  font-family: var(--mono-font);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 9px 10px;
+  color: var(--white);
+  font-size: 13px;
+  resize: vertical;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+.btn-primary {
+  width: 100%;
+  margin-top: 4px;
+  font-family: var(--display-font);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  background: var(--red);
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-primary:hover { background: #ff1a30; }
+
+.browse-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.browse-card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.browse-card-class {
+  font-family: var(--mono-font);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--cyan);
+}
+
+.browse-card-name {
+  font-family: var(--display-font);
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.browse-card-specs {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.browse-card-add {
+  margin-top: 4px;
+  font-family: var(--display-font);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.browse-card-add:hover { background: var(--red); border-color: var(--red); }
+
+.browse-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12.5px;
+  padding: 30px 10px;
+}
+
+/* ---------------------------------------------------------
+   DEVLOG WINDOW CONTENT
+--------------------------------------------------------- */
+
+.devlog-content {
+  display: flex;
+  height: 100%;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
 @media (max-width: 900px) {
-  .window {
-    width: 92vw !important;
-    height: 70vh !important;
-    left: 4vw !important;
-  }
-   .welcome-grid { grid-template-columns: 1fr; }
+  .window { width: 92vw !important; left: 4vw !important; height: 70vh !important; }
+  .welcome-grid { grid-template-columns: 1fr; }
   .display-specs { grid-template-columns: 1fr 1fr; }
+  .browse-grid { grid-template-columns: 1fr; }
   #icon-layer { top: 56px; left: 12px; }
   .topbar-session { display: none; }
+  .race-countdown { left: 12px; bottom: 12px; padding: 12px 14px; }
+  .countdown-clock { gap: 10px; }
+  .countdown-unit span { font-size: 18px; }
 }
