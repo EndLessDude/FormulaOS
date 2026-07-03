@@ -1,22 +1,17 @@
 # RaceOS
 
-RaceOS is a browser-based operating system built with HTML, CSS, and JavaScript. It is designed around a modern motorsport aesthetic and features a modular desktop environment with reusable applications, draggable windows, and a scalable architecture for future expansion.
+RaceOS is a browser-based operating system built with HTML, CSS, and JavaScript. It is designed around a motorsport theme with specilized features built for it's theme.
 
 ## Features
 
 * Browser-based desktop environment
 * Draggable windows
-* Window focus management
 * Desktop application icons
-* Dynamic window initialization
 * Live clock
-* Modular application architecture
-* Reusable UI components
+* A countdown to the next session in F1(Practice, Qualyfying, Grand Prix, etc.)
 
-## Theme
+## Applications
 
-The interface is inspired by modern motorsport, using a dark color palette with racing-inspired visuals, clean typography, and a minimal desktop environment.
-
-## Status
-
-RaceOS is currently under development.
+* Welcome: Introduces the user to all the applications.
+* Garage: The user can add cars to it's virtual collection by entering custom values or by selecting pre-made options.
+* Lights Out: A fun application designed to test the user's reaction time in a motorsport fasion.
