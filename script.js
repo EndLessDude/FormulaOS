@@ -1,8 +1,8 @@
 /* =========================================================
    RaceOS — script.js
-   Reusable window manager + icon system + dynamic content.
+   Reusable window manager + taskbar + dynamic content.
    Adding a new app only requires:
-     1. An icon block in HTML with class "desktop-icon" + data-window
+     1. A taskbar icon block in HTML with class "taskbar-icon" + data-window
      2. A window block in HTML with class "window" + matching id
      3. A call to initializeWindow("appName") below
    ========================================================= */
@@ -11,11 +11,15 @@
    GLOBAL STATE
 --------------------------------------------------------- */
 
-let biggestIndex = 100;     // tracks the highest z-index in use
-let selectedIcon = null;    // currently selected desktop icon (DOM element)
-let clockFormat = '24';     // '12' or '24' — chosen on the ignition screen
+let biggestIndex = 100;      // tracks the highest z-index in use
+let activeWindowId = null;   // id of the currently focused window
+let clockFormat = '24';      // '12' or '24' — chosen on the ignition screen
 
 const topBar = document.getElementById('topbar');
+const TOPBAR_H = 44;
+const TASKBAR_H = 68;
+
+const windowMeta = {}; // per-window: { maximized, prevRect }
 
 /* ---------------------------------------------------------
    CLOCK — respects the format chosen on the ignition screen
@@ -50,7 +54,6 @@ const nextSessionDate = new Date('2026-07-03T12:30:00+01:00');
 function updateCountdown() {
   const now = new Date();
   let diff = nextSessionDate - now;
-
   if (diff < 0) diff = 0;
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -67,54 +70,25 @@ updateCountdown();
 setInterval(updateCountdown, 1000);
 
 /* ---------------------------------------------------------
-   IGNITION SEQUENCE
+   IGNITION — Start OS -> clock format prompt
 --------------------------------------------------------- */
 
-const bootLines = [
-  'IGNITION SEQUENCE INITIATED',
-  'FUEL PUMP PRIMED',
-  'ECU HANDSHAKE COMPLETE',
-  'TELEMETRY LINK ESTABLISHED',
-  'PIT WALL SYSTEMS ONLINE',
-  'RACEOS READY'
-];
-
-function runBootSequence() {
+function initializeIgnition() {
+  const igniteBtn = document.getElementById('ignition-btn');
   const stageStart = document.getElementById('stage-start');
-  const stageBoot = document.getElementById('stage-boot');
   const stageFormat = document.getElementById('stage-format');
-  const log = document.getElementById('boot-log');
-  const progressFill = document.getElementById('boot-progress-fill');
-  const tachoFill = document.getElementById('tacho-fill');
-  const tachoNeedle = document.getElementById('tacho-needle');
 
-  stageStart.hidden = true;
-  stageBoot.hidden = false;
-
-  const totalSteps = bootLines.length;
-  const circumference = 276; // matches the tacho arc's stroke-dasharray
-
-  bootLines.forEach((line, i) => {
+  igniteBtn.addEventListener('click', () => {
+    igniteBtn.classList.add('firing');
     setTimeout(() => {
-      const lineEl = document.createElement('div');
-      lineEl.className = 'boot-log-line ok';
-      lineEl.textContent = `> ${line}`;
-      log.appendChild(lineEl);
-
-      const progress = ((i + 1) / totalSteps) * 100;
-      progressFill.style.width = progress + '%';
-      tachoFill.style.strokeDashoffset = circumference - (circumference * progress) / 100;
-
-      // Needle sweeps from -80deg (idle) toward +80deg (redline) as the log fills.
-      const angle = -80 + (progress / 100) * 160;
-      tachoNeedle.style.transform = `rotate(${angle}deg)`;
-    }, i * 380);
+      stageStart.hidden = true;
+      stageFormat.hidden = false;
+    }, 350);
   });
 
-  setTimeout(() => {
-    stageBoot.hidden = true;
-    stageFormat.hidden = false;
-  }, totalSteps * 380 + 500);
+  document.querySelectorAll('.format-btn').forEach((btn) => {
+    btn.addEventListener('click', () => finishIgnition(btn.dataset.format));
+  });
 }
 
 function finishIgnition(format) {
@@ -123,53 +97,76 @@ function finishIgnition(format) {
 
   const ignitionScreen = document.getElementById('ignition-screen');
   ignitionScreen.classList.add('hidden');
-  setTimeout(() => {
-    ignitionScreen.style.display = 'none';
-  }, 650);
+  setTimeout(() => { ignitionScreen.style.display = 'none'; }, 650);
 
-  // Open the welcome window as the first thing the driver sees.
+  // Open the guide window as the first thing the driver sees.
   openWindow(document.getElementById('welcome'));
-}
-
-function initializeIgnition() {
-  document.getElementById('ignition-btn').addEventListener('click', runBootSequence);
-
-  document.querySelectorAll('.format-btn').forEach((btn) => {
-    btn.addEventListener('click', () => finishIgnition(btn.dataset.format));
-  });
 }
 
 /* ---------------------------------------------------------
    WINDOW MANAGER
 --------------------------------------------------------- */
 
-// Bring a window above every other window, and keep the top bar above all.
 function bringToFront(win) {
   biggestIndex += 1;
   win.style.zIndex = biggestIndex;
   topBar.style.zIndex = biggestIndex + 1;
+  activeWindowId = win.id;
+  updateTaskbar();
 }
 
-// Open: display the window and bring it to front.
-function openWindow(element) {
-  element.style.display = 'flex';
-  bringToFront(element);
+function openWindow(win) {
+  win.style.display = 'flex';
+  win.dataset.state = 'open';
+  bringToFront(win);
 }
 
-// Close: hide the window.
-function closeWindow(element) {
-  element.style.display = 'none';
+function minimizeWindow(win) {
+  win.style.display = 'none';
+  win.dataset.state = 'minimized';
+  if (activeWindowId === win.id) activeWindowId = null;
+  updateTaskbar();
+}
+
+function closeWindowFull(win) {
+  win.style.display = 'none';
+  win.dataset.state = 'closed';
+  if (activeWindowId === win.id) activeWindowId = null;
+  updateTaskbar();
+}
+
+function toggleMaximizeWindow(win) {
+  const meta = windowMeta[win.id] || (windowMeta[win.id] = { maximized: false, prevRect: null });
+
+  if (!meta.maximized) {
+    meta.prevRect = {
+      top: win.style.top, left: win.style.left,
+      width: win.style.width, height: win.style.height
+    };
+    win.style.top = TOPBAR_H + 'px';
+    win.style.left = '0px';
+    win.style.width = '100%';
+    win.style.height = `calc(100% - ${TOPBAR_H}px - ${TASKBAR_H}px)`;
+    meta.maximized = true;
+  } else {
+    if (meta.prevRect) {
+      win.style.top = meta.prevRect.top;
+      win.style.left = meta.prevRect.left;
+      win.style.width = meta.prevRect.width;
+      win.style.height = meta.prevRect.height;
+    }
+    meta.maximized = false;
+  }
+
+  win.dataset.state = 'open';
+  win.style.display = 'flex';
+  bringToFront(win);
 }
 
 /* ---- Window tap handling -------------------------------- */
 
-// Bring the clicked window to front and clear any selected icon.
 function handleWindowTap(win) {
   bringToFront(win);
-  if (selectedIcon) {
-    selectedIcon.classList.remove('selected');
-    selectedIcon = null;
-  }
 }
 
 function addWindowTapHandling(win) {
@@ -186,6 +183,7 @@ function dragElement(win, header) {
   header.addEventListener('mousedown', dragMouseDown);
 
   function dragMouseDown(e) {
+    if (e.target.closest('.winctrl')) return; // don't drag when clicking a control button
     e.preventDefault();
     handleWindowTap(win);
 
@@ -198,12 +196,21 @@ function dragElement(win, header) {
 
   function dragMouseMove(e) {
     e.preventDefault();
+
+    // Dragging exits the maximized state so the window becomes freely movable again.
+    const meta = windowMeta[win.id];
+    if (meta && meta.maximized) {
+      meta.maximized = false;
+      win.style.width = meta.prevRect ? meta.prevRect.width : win.style.width;
+      win.style.height = meta.prevRect ? meta.prevRect.height : win.style.height;
+    }
+
     let newLeft = e.clientX - offsetX;
     let newTop = e.clientY - offsetY;
 
-    // Keep the window from being dragged behind the top bar.
-    const topBarHeight = topBar.offsetHeight;
-    if (newTop < topBarHeight) newTop = topBarHeight;
+    const maxTop = window.innerHeight - TASKBAR_H - 40;
+    if (newTop < TOPBAR_H) newTop = TOPBAR_H;
+    if (newTop > maxTop) newTop = maxTop;
 
     win.style.left = newLeft + 'px';
     win.style.top = newTop + 'px';
@@ -215,16 +222,21 @@ function dragElement(win, header) {
   }
 }
 
-/* ---- Close button ------------------------------------------ */
+/* ---- Window controls: minimize / maximize / close ---------- */
 
-function enableCloseButton(win) {
-  const closeBtn = win.querySelector('.closebutton');
-  if (!closeBtn) return;
-  closeBtn.addEventListener('mousedown', (e) => {
-    // Prevent the drag/tap handlers on the header from firing.
-    e.stopPropagation();
+function enableWindowControls(win) {
+  const minBtn = win.querySelector('.btn-minimize');
+  const maxBtn = win.querySelector('.btn-maximize');
+  const closeBtn = win.querySelector('.btn-close');
+
+  [minBtn, maxBtn, closeBtn].forEach((btn) => {
+    if (!btn) return;
+    btn.addEventListener('mousedown', (e) => e.stopPropagation());
   });
-  closeBtn.addEventListener('click', () => closeWindow(win));
+
+  if (minBtn) minBtn.addEventListener('click', () => minimizeWindow(win));
+  if (maxBtn) maxBtn.addEventListener('click', () => toggleMaximizeWindow(win));
+  if (closeBtn) closeBtn.addEventListener('click', () => closeWindowFull(win));
 }
 
 /* ---- Reusable window initialization ----------------------- */
@@ -237,38 +249,125 @@ function initializeWindow(windowName) {
     return;
   }
 
+  win.dataset.state = 'closed';
+  windowMeta[win.id] = { maximized: false, prevRect: null };
+
   dragElement(win, header);
   addWindowTapHandling(win);
-  enableCloseButton(win);
+  enableWindowControls(win);
 }
 
 /* ---------------------------------------------------------
-   ICON SYSTEM
+   TASKBAR
 --------------------------------------------------------- */
 
-function initializeIcon(name) {
+function updateTaskbar() {
+  document.querySelectorAll('.taskbar-icon').forEach((icon) => {
+    const win = document.getElementById(icon.dataset.window);
+    if (!win) return;
+    const isOpen = win.dataset.state === 'open' || win.dataset.state === 'minimized';
+    const isActive = activeWindowId === win.id && win.dataset.state === 'open';
+    icon.classList.toggle('open', isOpen);
+    icon.classList.toggle('active', isActive);
+  });
+}
+
+function initializeTaskbarIcon(name) {
   const icon = document.getElementById('icon-' + name);
   if (!icon) {
-    console.warn(`RaceOS: could not initialize icon "${name}" — missing element.`);
+    console.warn(`RaceOS: could not initialize taskbar icon "${name}" — missing element.`);
     return;
   }
 
-  const windowId = icon.dataset.window;
-  const win = document.getElementById(windowId);
+  const win = document.getElementById(icon.dataset.window);
+  if (!win) return;
 
   icon.addEventListener('click', () => {
-    if (icon.classList.contains('selected')) {
-      // Already selected -> deselect and open its window.
-      icon.classList.remove('selected');
-      selectedIcon = null;
-      if (win) openWindow(win);
+    const state = win.dataset.state;
+    if (state !== 'open') {
+      openWindow(win);
+    } else if (activeWindowId === win.id) {
+      minimizeWindow(win);
     } else {
-      // Not selected -> select it (deselect any other icon first).
-      if (selectedIcon) selectedIcon.classList.remove('selected');
-      icon.classList.add('selected');
-      selectedIcon = icon;
+      bringToFront(win);
     }
+    updateTaskbar();
   });
+}
+
+/* ---------------------------------------------------------
+   APPLICATION: WELCOME / APP GUIDE
+   Explains each application in the OS.
+--------------------------------------------------------- */
+
+const appGuide = [
+  {
+    id: 'garage',
+    name: 'Garage',
+    eyebrow: 'APP 01 — COLLECTION MANAGEMENT',
+    tagline: 'Build, browse, and manage your car collection.',
+    body: `The Garage is where your collection lives. It starts with a single car, and grows
+      however you like — hand-build a custom entry with your own specs and notes, or browse a
+      preset collection of ten GT3 and GTE machines and add them with one click. Every car gets
+      its own spec card with power, weight, and top speed, plus room for your own notes on setup
+      and character.`,
+    windowId: 'garage'
+  },
+  {
+    id: 'lightsout',
+    name: 'Lights Out',
+    eyebrow: 'APP 02 — REACTION TRAINER',
+    tagline: 'Test your reflexes against a real F1 start sequence.',
+    body: `Five lights illuminate one by one, just like the start gantry at a real Grand Prix.
+      Jump the start and you'll be flagged before the lights even go out. Wait for all five to go
+      dark, then react as fast as you can — your time is measured in milliseconds and graded from
+      "Back to Karting" to "F1 Reflexes." Your personal best is saved between sessions.`,
+    windowId: 'lightsout'
+  }
+];
+
+function buildGuideSidebar() {
+  const sidebar = document.getElementById('guide-sidebar');
+  sidebar.innerHTML = '';
+
+  appGuide.forEach((app, index) => {
+    const entry = document.createElement('div');
+    entry.className = 'garage-entry';
+    entry.dataset.index = index;
+    entry.innerHTML = `
+      <span class="entry-number">APP ${String(index + 1).padStart(2, '0')}</span>
+      <div class="entry-name">${app.name}</div>
+      <div class="entry-class">${app.tagline}</div>
+    `;
+    entry.addEventListener('click', () => setGuideContent(index));
+    sidebar.appendChild(entry);
+  });
+}
+
+function setGuideContent(index) {
+  const app = appGuide[index];
+  const display = document.getElementById('guide-display');
+
+  display.innerHTML = `
+    <div class="display-eyebrow">${app.eyebrow}</div>
+    <h2 class="display-title">${app.name}</h2>
+    <div class="display-meta">${app.tagline}</div>
+    <p class="display-body">${app.body}</p>
+    <button class="btn-launch" id="guide-launch-btn">LAUNCH ${app.name.toUpperCase()} →</button>
+  `;
+
+  document.getElementById('guide-launch-btn').addEventListener('click', () => {
+    openWindow(document.getElementById(app.windowId));
+  });
+
+  document.querySelectorAll('#guide-sidebar .garage-entry').forEach((el) => {
+    el.classList.toggle('active', Number(el.dataset.index) === index);
+  });
+}
+
+function initializeGuideApp() {
+  buildGuideSidebar();
+  setGuideContent(0);
 }
 
 /* ---------------------------------------------------------
@@ -277,7 +376,6 @@ function initializeIcon(name) {
    via the "+ ADD CAR" button (Custom Build or Browse Collection).
 --------------------------------------------------------- */
 
-// The garage's own live collection — mutable, starts with one car.
 const garageCars = [
   {
     title: "Ferrari 488 GT3 Evo",
@@ -290,7 +388,6 @@ const garageCars = [
   }
 ];
 
-// Cars available to browse and add — none of these start in the garage.
 const browseCollectionCars = [
   {
     title: "Porsche 911 RSR",
@@ -394,7 +491,6 @@ function buildGarageSidebar() {
   document.getElementById('garage-count').textContent = garageCars.length;
 }
 
-// Retrieve a content object, render it, and mark it active in the sidebar.
 function setContent(index) {
   const car = garageCars[index];
   const display = document.getElementById('garage-display');
@@ -428,13 +524,11 @@ function setContent(index) {
 
 function initializeGarageApp() {
   buildGarageSidebar();
-  setContent(0); // show the sole default car
+  setContent(0);
 }
 
 /* ---------------------------------------------------------
    APPLICATION: ADD CAR — Custom Build & Browse Collection
-   Original feature: lets the driver grow the garage either by
-   hand-building a car or importing one from a preset collection.
 --------------------------------------------------------- */
 
 function initializeAddCarApp() {
@@ -446,7 +540,6 @@ function initializeAddCarApp() {
     openWindow(addCarWindow);
   });
 
-  // Tab switching
   document.querySelectorAll('.addcar-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.addcar-tab').forEach((t) => t.classList.remove('active'));
@@ -456,7 +549,6 @@ function initializeAddCarApp() {
     });
   });
 
-  // Custom build submission
   document.getElementById('submit-custom-car').addEventListener('click', () => {
     const name = document.getElementById('input-name').value.trim();
     const carClass = document.getElementById('input-class').value;
@@ -486,15 +578,14 @@ function initializeAddCarApp() {
     buildGarageSidebar();
     setContent(garageCars.length - 1);
 
-    // Reset the form for next time.
     document.getElementById('input-name').value = '';
     document.getElementById('input-power').value = '';
     document.getElementById('input-weight').value = '';
     document.getElementById('input-topspeed').value = '';
     document.getElementById('input-notes').value = '';
 
-    closeWindow(addCarWindow);
-    bringToFront(document.getElementById('garage'));
+    closeWindowFull(addCarWindow);
+    openWindow(document.getElementById('garage'));
   });
 }
 
@@ -528,97 +619,160 @@ function renderBrowseGrid() {
 }
 
 /* ---------------------------------------------------------
-   APPLICATION: DEVLOG — build history of the project itself
+   APPLICATION: LIGHTS OUT — F1-style reaction time trainer
+   Five lights illuminate one at a time. A random hold follows
+   the fifth light, then all five extinguish together — that's
+   the "go" signal. Click before they go out and it's a false
+   start; click after, and your reaction time is measured.
 --------------------------------------------------------- */
 
-const devlogEntries = [
-  {
-    title: "Pit Wall Boots Up",
-    date: "Build 0.1",
-    class: "Foundation",
-    specs: { power: "Window Mgr", weight: "Drag + Focus", topSpeed: "Icon System" },
-    content: `First working build. Established the reusable window manager: draggable headers,
-      click-to-front z-index stacking, and open/close handling shared by every app. Desktop icons
-      got their select-then-open behavior, with only one icon selectable at a time. Welcome and
-      Garage shipped as the first two applications, both built on the same reusable classes so
-      future apps wouldn't need custom scaffolding.`
-  },
-  {
-    title: "Garage Goes Live",
-    date: "Build 0.2",
-    class: "Content architecture",
-    specs: { power: "Dynamic Data", weight: "Sidebar Gen", topSpeed: "Spec Cards" },
-    content: `Replaced hardcoded HTML entries with a proper content array and a setContent(index)
-      renderer, so the Garage sidebar and detail view are both generated from data. Added the spec
-      card layout (power / weight / top speed) as the visual language for anything car-related,
-      which every later feature reused instead of inventing something new.`
-  },
-  {
-    title: "Ignition & Telemetry",
-    date: "Build 0.3",
-    class: "Original features",
-    specs: { power: "Boot Sequence", weight: "Live Countdown", topSpeed: "Add Car" },
-    content: `The biggest update yet. Added an ignition screen with an engine-start boot animation
-      gating entry to the OS, plus a 12-hour/24-hour clock format prompt that the top bar clock now
-      respects. Replaced the wallpaper with a stylized Silverstone circuit layout and a live
-      countdown to the next real session, Free Practice 1. Expanded the Garage with an Add Car
-      window offering Custom Build and Browse Collection paths, and dropped the default garage back
-      down to a single car so growing the collection actually means something. This Devlog app is
-      also new, and now tracks its own build history.`
+let loState = 'idle';       // idle | armed | waiting | go | result | falseStart
+let loTimers = [];
+let loGoTimestamp = 0;
+let loBest = null;
+let loHistory = [];
+
+const LO_BEST_KEY = 'raceos-lightsout-best';
+
+function loClearTimers() {
+  loTimers.forEach((id) => clearTimeout(id));
+  loTimers = [];
+}
+
+function loSetStatus(text) {
+  document.getElementById('lo-status').textContent = text;
+}
+
+function loClearLights() {
+  document.querySelectorAll('.lo-light').forEach((l) => l.classList.remove('lit'));
+}
+
+function loStartSequence() {
+  loClearTimers();
+  loClearLights();
+  loState = 'armed';
+
+  loSetStatus('GET READY...');
+  document.getElementById('lo-result-value').textContent = '--';
+  document.getElementById('lo-grade').textContent = '';
+  document.getElementById('lo-grade').className = 'lo-grade';
+
+  const startBtn = document.getElementById('lo-start-btn');
+  startBtn.disabled = true;
+  startBtn.textContent = 'SEQUENCE RUNNING...';
+
+  const lights = document.querySelectorAll('.lo-light');
+
+  for (let i = 0; i < 5; i++) {
+    const t = setTimeout(() => {
+      lights[i].classList.add('lit');
+
+      if (i === 4) {
+        loState = 'waiting';
+        loSetStatus('HOLD...');
+
+        const holdDelay = 1000 + Math.random() * 2000; // 1s–3s, unpredictable like a real start
+        const t2 = setTimeout(() => {
+          loClearLights();
+          loState = 'go';
+          loGoTimestamp = performance.now();
+          loSetStatus('LIGHTS OUT — GO!');
+          document.getElementById('lo-rig').classList.add('go-flash');
+          setTimeout(() => document.getElementById('lo-rig').classList.remove('go-flash'), 500);
+        }, holdDelay);
+        loTimers.push(t2);
+      }
+    }, i * 1000);
+    loTimers.push(t);
   }
-];
+}
 
-function buildDevlogSidebar() {
-  const sidebar = document.getElementById('devlog-sidebar');
-  sidebar.innerHTML = '';
+function loGradeFor(ms) {
+  if (ms < 180) return { label: 'F1 REFLEXES', cls: 'grade-elite' };
+  if (ms < 230) return { label: 'PRO PACE', cls: 'grade-pro' };
+  if (ms < 300) return { label: 'RACE READY', cls: 'grade-good' };
+  if (ms < 450) return { label: 'ROOKIE', cls: 'grade-avg' };
+  return { label: 'BACK TO KARTING', cls: 'grade-slow' };
+}
 
-  devlogEntries.forEach((entry, index) => {
-    const el = document.createElement('div');
-    el.className = 'garage-entry';
-    el.dataset.index = index;
-    el.innerHTML = `
-      <span class="entry-number">${entry.date.toUpperCase()}</span>
-      <div class="entry-name">${entry.title}</div>
-      <div class="entry-class">${entry.class}</div>
-    `;
-    el.addEventListener('click', () => setDevlogContent(index));
-    sidebar.appendChild(el);
+function loShowResult(ms) {
+  const rounded = Math.round(ms);
+  document.getElementById('lo-result-value').textContent = rounded;
+
+  const g = loGradeFor(rounded);
+  const gradeEl = document.getElementById('lo-grade');
+  gradeEl.textContent = g.label;
+  gradeEl.className = 'lo-grade ' + g.cls;
+
+  loSetStatus('REACTION RECORDED');
+
+  loHistory.unshift({ ms: rounded, grade: g.label });
+  loHistory = loHistory.slice(0, 8);
+  loRenderHistory();
+
+  if (loBest === null || rounded < loBest) {
+    loBest = rounded;
+    try { localStorage.setItem(LO_BEST_KEY, String(loBest)); } catch (e) { /* storage unavailable */ }
+  }
+  document.getElementById('lo-best').textContent = loBest + ' ms';
+}
+
+function loRenderHistory() {
+  const el = document.getElementById('lo-history');
+  el.innerHTML = '';
+
+  if (loHistory.length === 0) {
+    el.innerHTML = '<div class="lo-history-empty">No attempts yet.</div>';
+    return;
+  }
+
+  loHistory.forEach((h) => {
+    const row = document.createElement('div');
+    row.className = 'lo-history-row';
+    row.innerHTML = `<span>${h.ms} ms</span><span class="lo-history-grade">${h.grade}</span>`;
+    el.appendChild(row);
   });
 }
 
-function setDevlogContent(index) {
-  const entry = devlogEntries[index];
-  const display = document.getElementById('devlog-display');
+function loHandleRigClick() {
+  const startBtn = document.getElementById('lo-start-btn');
 
-  display.innerHTML = `
-    <div class="display-eyebrow">DEVLOG.LOG // ENTRY ${String(index + 1).padStart(2, '0')} OF ${String(devlogEntries.length).padStart(2, '0')}</div>
-    <h2 class="display-title">${entry.title}</h2>
-    <div class="display-meta">${entry.date} · ${entry.class}</div>
-    <div class="display-specs">
-      <div class="spec-box">
-        <span class="spec-label">HEADLINE</span>
-        <span class="spec-value" style="font-size:13px;">${entry.specs.power}</span>
-      </div>
-      <div class="spec-box">
-        <span class="spec-label">HEADLINE</span>
-        <span class="spec-value" style="font-size:13px;">${entry.specs.weight}</span>
-      </div>
-      <div class="spec-box">
-        <span class="spec-label">HEADLINE</span>
-        <span class="spec-value" style="font-size:13px;">${entry.specs.topSpeed}</span>
-      </div>
-    </div>
-    <p class="display-body">${entry.content}</p>
-  `;
-
-  document.querySelectorAll('#devlog-sidebar .garage-entry').forEach((el) => {
-    el.classList.toggle('active', Number(el.dataset.index) === index);
-  });
+  if (loState === 'armed' || loState === 'waiting') {
+    // Clicked before the lights went out — false start.
+    loClearTimers();
+    loClearLights();
+    loState = 'falseStart';
+    loSetStatus('FALSE START — JUMP DETECTED');
+    document.getElementById('lo-result-value').textContent = 'DQ';
+    const gradeEl = document.getElementById('lo-grade');
+    gradeEl.textContent = 'Wait for lights out next time.';
+    gradeEl.className = 'lo-grade grade-slow';
+    startBtn.disabled = false;
+    startBtn.textContent = 'TRY AGAIN';
+  } else if (loState === 'go') {
+    const reaction = performance.now() - loGoTimestamp;
+    loState = 'result';
+    loShowResult(reaction);
+    startBtn.disabled = false;
+    startBtn.textContent = 'RUN AGAIN';
+  } else if (loState === 'idle' || loState === 'result' || loState === 'falseStart') {
+    loSetStatus('PRESS START SEQUENCE FIRST');
+  }
 }
 
-function initializeDevlogApp() {
-  buildDevlogSidebar();
-  setDevlogContent(0);
+function initializeLightsOutApp() {
+  document.getElementById('lo-start-btn').addEventListener('click', loStartSequence);
+  document.getElementById('lo-rig').addEventListener('click', loHandleRigClick);
+
+  try {
+    const saved = localStorage.getItem(LO_BEST_KEY);
+    if (saved) {
+      loBest = Number(saved);
+      document.getElementById('lo-best').textContent = loBest + ' ms';
+    }
+  } catch (e) { /* storage unavailable */ }
+
+  loRenderHistory();
 }
 
 /* ---------------------------------------------------------
@@ -626,25 +780,25 @@ function initializeDevlogApp() {
 --------------------------------------------------------- */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Ignition screen (gates entry to the desktop)
   initializeIgnition();
 
   // Windows
   initializeWindow('welcome');
   initializeWindow('garage');
   initializeWindow('addcar');
-  initializeWindow('devlog');
+  initializeWindow('lightsout');
 
-  // Icons
-  initializeIcon('welcome');
-  initializeIcon('garage');
-  initializeIcon('devlog');
+  // Taskbar icons
+  initializeTaskbarIcon('welcome');
+  initializeTaskbarIcon('garage');
+  initializeTaskbarIcon('lightsout');
 
   // App-specific dynamic content
+  initializeGuideApp();
   initializeGarageApp();
   initializeAddCarApp();
-  initializeDevlogApp();
+  initializeLightsOutApp();
 
-  // Top bar always sits above the highest window.
   topBar.style.zIndex = biggestIndex + 1;
+  updateTaskbar();
 });
