@@ -1,29 +1,14 @@
-/* =========================================================
-   RaceOS — script.js
-   Reusable window manager + taskbar + dynamic content.
-   Adding a new app only requires:
-     1. A taskbar icon block in HTML with class "taskbar-icon" + data-window
-     2. A window block in HTML with class "window" + matching id
-     3. A call to initializeWindow("appName") below
-   ========================================================= */
-
-/* ---------------------------------------------------------
-   GLOBAL STATE
---------------------------------------------------------- */
-
-let biggestIndex = 100;      // tracks the highest z-index in use
-let activeWindowId = null;   // id of the currently focused window
-let clockFormat = '24';      // '12' or '24' — chosen on the ignition screen
+let biggestIndex = 100;
+let activeWindowId = null;
+let clockFormat = '24';
 
 const topBar = document.getElementById('topbar');
-const TOPBAR_H = 44;
-const TASKBAR_H = 68;
+const TOPBAR_H = 40;
+const TASKBAR_H = 56;
 
-const windowMeta = {}; // per-window: { maximized, prevRect }
+const windowMeta = {};
 
-/* ---------------------------------------------------------
-   CLOCK — respects the format chosen on the ignition screen
---------------------------------------------------------- */
+// Clock
 
 function updateClock() {
   const now = new Date();
@@ -44,17 +29,236 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-/* ---------------------------------------------------------
-   RACE COUNTDOWN — next session is FP1 at Silverstone
---------------------------------------------------------- */
+// 2026 F1 Season Schedule, for the countdown timer
 
-// British GP 2026, Free Practice 1 — Friday July 3, 2026, 12:30 BST (UTC+1).
-const nextSessionDate = new Date('2026-07-03T12:30:00+01:00');
+const F1_2026_SCHEDULE = [
+  // Round 1: Australia (Melbourne) UTC+11 (AEDT)
+  { round: 1, track: 'Albert Park', country: 'Australia', tz: '+11:00', gpName: 'AUSTRALIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-03-07T12:30:00+11:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-03-07T16:00:00+11:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-03-08T12:30:00+11:00' },
+      { name: 'QUALIFYING', date: '2026-03-08T16:00:00+11:00' },
+      { name: 'GRAND PRIX', date: '2026-03-09T15:00:00+11:00' }
+  ]},
+  // Round 2: China (Shanghai) Sprint UTC+8
+  { round: 2, track: 'Shanghai', country: 'China', tz: '+08:00', gpName: 'CHINESE GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-03-14T12:30:00+08:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-03-14T16:30:00+08:00' },
+      { name: 'SPRINT RACE', date: '2026-03-15T12:00:00+08:00' },
+      { name: 'GP QUALIFYING', date: '2026-03-15T16:00:00+08:00' },
+      { name: 'GRAND PRIX', date: '2026-03-16T15:00:00+08:00' }
+  ]},
+  // Round 3: Japan (Suzuka) UTC+9
+  { round: 3, track: 'Suzuka', country: 'Japan', tz: '+09:00', gpName: 'JAPANESE GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-03-28T12:30:00+09:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-03-28T16:00:00+09:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-03-29T12:30:00+09:00' },
+      { name: 'QUALIFYING', date: '2026-03-29T16:00:00+09:00' },
+      { name: 'GRAND PRIX', date: '2026-03-30T15:00:00+09:00' }
+  ]},
+  // Round 4: Miami SPRINT UTC-4 (EDT)
+  { round: 4, track: 'Miami', country: 'USA', tz: '-04:00', gpName: 'MIAMI GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-05-02T12:30:00-04:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-05-02T16:30:00-04:00' },
+      { name: 'SPRINT RACE', date: '2026-05-03T12:00:00-04:00' },
+      { name: 'GP QUALIFYING', date: '2026-05-03T16:00:00-04:00' },
+      { name: 'GRAND PRIX', date: '2026-05-04T15:00:00-04:00' }
+  ]},
+  // Round 5: Canada (Montreal) UTC-4 (EDT)
+  { round: 5, track: 'Montreal', country: 'Canada', tz: '-04:00', gpName: 'CANADIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-05-23T12:30:00-04:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-05-23T16:00:00-04:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-05-24T12:30:00-04:00' },
+      { name: 'QUALIFYING', date: '2026-05-24T16:00:00-04:00' },
+      { name: 'GRAND PRIX', date: '2026-05-25T15:00:00-04:00' }
+  ]},
+  // Round 6: Monaco UTC+2 (CEST)
+  { round: 6, track: 'Monaco', country: 'Monaco', tz: '+02:00', gpName: 'MONACO GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-06-05T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-06-05T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-06-06T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-06-06T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-06-07T15:00:00+02:00' }
+  ]},
+  // Round 7: Spain (Barcelona) UTC+2 (CEST)
+  { round: 7, track: 'Barcelona', country: 'Spain', tz: '+02:00', gpName: 'SPANISH GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-06-12T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-06-12T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-06-13T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-06-13T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-06-14T15:00:00+02:00' }
+  ]},
+  // Round 8: Austria (Spielberg) Sprint UTC+2 (CEST)
+  { round: 8, track: 'Spielberg', country: 'Austria', tz: '+02:00', gpName: 'AUSTRIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-06-26T12:30:00+02:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-06-26T16:30:00+02:00' },
+      { name: 'SPRINT RACE', date: '2026-06-27T12:00:00+02:00' },
+      { name: 'GP QUALIFYING', date: '2026-06-27T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-06-28T15:00:00+02:00' }
+  ]},
+  // Round 9: Great Britain (Silverstone) Sprint  UTC+1 (BST)
+  { round: 9, track: 'Silverstone', country: 'Great Britain', tz: '+01:00', gpName: 'BRITISH GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-07-03T12:30:00+01:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-07-03T16:30:00+01:00' },
+      { name: 'SPRINT RACE', date: '2026-07-04T12:00:00+01:00' },
+      { name: 'GP QUALIFYING', date: '2026-07-04T16:00:00+01:00' },
+      { name: 'GRAND PRIX', date: '2026-07-05T15:00:00+01:00' }
+  ]},
+  //Round 10: Belgium (Spa) Sprint UTC+2 (CEST) 
+  { round: 10, track: 'Spa', country: 'Belgium', tz: '+02:00', gpName: 'BELGIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-07-17T12:30:00+02:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-07-17T16:30:00+02:00' },
+      { name: 'SPRINT RACE', date: '2026-07-18T12:00:00+02:00' },
+      { name: 'GP QUALIFYING', date: '2026-07-18T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-07-19T15:00:00+02:00' }
+  ]},
+  // Round 11: Hungary (Budapest) UTC+2 (CEST)
+  { round: 11, track: 'Budapest', country: 'Hungary', tz: '+02:00', gpName: 'HUNGARIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-07-24T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-07-24T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-07-25T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-07-25T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-07-26T15:00:00+02:00' }
+  ]},
+  // Round 12: Netherlands (Zandvoort) UTC+2 (CEST)
+  { round: 12, track: 'Zandvoort', country: 'Netherlands', tz: '+02:00', gpName: 'DUTCH GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-08-21T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-08-21T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-08-22T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-08-22T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-08-23T15:00:00+02:00' }
+  ]},
+  // Round 13: Italy (Monza)UTC+2 (CEST)
+  { round: 13, track: 'Monza', country: 'Italy', tz: '+02:00', gpName: 'ITALIAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-09-04T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-09-04T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-09-05T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-09-05T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-09-06T15:00:00+02:00' }
+  ]},
+  // Round 14: Spain (Madrid street) UTC+2 (CEST)
+  { round: 14, track: 'Madrid', country: 'Spain', tz: '+02:00', gpName: 'MADRID GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-09-11T12:30:00+02:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-09-11T16:00:00+02:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-09-12T12:30:00+02:00' },
+      { name: 'QUALIFYING', date: '2026-09-12T16:00:00+02:00' },
+      { name: 'GRAND PRIX', date: '2026-09-13T15:00:00+02:00' }
+  ]},
+  // Round 15: Azerbaijan (Baku) UTC+4
+  { round: 15, track: 'Baku', country: 'Azerbaijan', tz: '+04:00', gpName: 'AZERBAIJAN GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-09-24T12:30:00+04:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-09-24T16:00:00+04:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-09-25T12:30:00+04:00' },
+      { name: 'QUALIFYING', date: '2026-09-25T16:00:00+04:00' },
+      { name: 'GRAND PRIX', date: '2026-09-26T15:00:00+04:00' }
+  ]},
+  // Round 16: Singapore UTC+8 (night race)
+  { round: 16, track: 'Singapore', country: 'Singapore', tz: '+08:00', gpName: 'SINGAPORE GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-10-09T12:30:00+08:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-10-09T16:00:00+08:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-10-10T12:30:00+08:00' },
+      { name: 'QUALIFYING', date: '2026-10-10T16:00:00+08:00' },
+      { name: 'GRAND PRIX', date: '2026-10-11T15:00:00+08:00' }
+  ]},
+  // Round 17: USA (COTA Austin) Sprint UTC-5 (CDT)
+  { round: 17, track: 'Austin', country: 'USA', tz: '-05:00', gpName: 'UNITED STATES GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-10-23T12:30:00-05:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-10-23T16:30:00-05:00' },
+      { name: 'SPRINT RACE', date: '2026-10-24T12:00:00-05:00' },
+      { name: 'GP QUALIFYING', date: '2026-10-24T16:00:00-05:00' },
+      { name: 'GRAND PRIX', date: '2026-10-25T15:00:00-05:00' }
+  ]},
+  // Round 18: Mexico (Mexico City) UTC-6 (CST)
+  { round: 18, track: 'Mexico City', country: 'Mexico', tz: '-06:00', gpName: 'MEXICO CITY GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-10-30T12:30:00-06:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-10-30T16:00:00-06:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-10-31T12:30:00-06:00' },
+      { name: 'QUALIFYING', date: '2026-10-31T16:00:00-06:00' },
+      { name: 'GRAND PRIX', date: '2026-11-01T15:00:00-06:00' }
+  ]},
+  // Round 19: Brazil (Sao Paulo) Sprint UTC-3 (BRT)
+  { round: 19, track: 'Interlagos', country: 'Brazil', tz: '-03:00', gpName: 'SAO PAULO GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-11-06T12:30:00-03:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-11-06T16:30:00-03:00' },
+      { name: 'SPRINT RACE', date: '2026-11-07T12:00:00-03:00' },
+      { name: 'GP QUALIFYING', date: '2026-11-07T16:00:00-03:00' },
+      { name: 'GRAND PRIX', date: '2026-11-08T15:00:00-03:00' }
+  ]},
+  // Round 20: Las Vegas UTC-8 (PST, night race)
+  { round: 20, track: 'Las Vegas', country: 'USA', tz: '-08:00', gpName: 'LAS VEGAS GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-11-19T12:30:00-08:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-11-19T16:00:00-08:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-11-20T12:30:00-08:00' },
+      { name: 'QUALIFYING', date: '2026-11-20T16:00:00-08:00' },
+      { name: 'GRAND PRIX', date: '2026-11-21T15:00:00-08:00' }
+  ]},
+  // Round 21: Qatar (Lusail) Sprint UTC+3
+  { round: 21, track: 'Lusail', country: 'Qatar', tz: '+03:00', gpName: 'QATAR GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-11-27T12:30:00+03:00' },
+      { name: 'SPRINT QUALIFYING', date: '2026-11-27T16:30:00+03:00' },
+      { name: 'SPRINT RACE', date: '2026-11-28T12:00:00+03:00' },
+      { name: 'GP QUALIFYING', date: '2026-11-28T16:00:00+03:00' },
+      { name: 'GRAND PRIX', date: '2026-11-29T15:00:00+03:00' }
+  ]},
+  // Round 22: Abu Dhabi UTC+4
+  { round: 22, track: 'Abu Dhabi', country: 'UAE', tz: '+04:00', gpName: 'ABU DHABI GP',
+    sessions: [
+      { name: 'FREE PRACTICE 1', date: '2026-12-04T12:30:00+04:00' },
+      { name: 'FREE PRACTICE 2', date: '2026-12-04T16:00:00+04:00' },
+      { name: 'FREE PRACTICE 3', date: '2026-12-05T12:30:00+04:00' },
+      { name: 'QUALIFYING', date: '2026-12-05T16:00:00+04:00' },
+      { name: 'GRAND PRIX', date: '2026-12-06T15:00:00+04:00' }
+  ]}
+];
+
+function findNextSession() {
+  const now = new Date();
+  for (const round of F1_2026_SCHEDULE) {
+    for (const session of round.sessions) {
+      const sessionDate = new Date(session.date);
+      if (sessionDate > now) {
+        return { round, session, date: sessionDate };
+      }
+    }
+  }
+  return null;
+}
+
+let currentNextSession = findNextSession();
 
 function updateCountdown() {
+  if (!currentNextSession) return;
+
   const now = new Date();
-  let diff = nextSessionDate - now;
-  if (diff < 0) diff = 0;
+  let diff = currentNextSession.date - now;
+  if (diff < 0) {
+    currentNextSession = findNextSession();
+    if (!currentNextSession) return;
+    diff = currentNextSession.date - now;
+    if (diff < 0) diff = 0;
+    applyTrackWallpaper(currentNextSession.round.track);
+  }
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -65,24 +269,134 @@ function updateCountdown() {
   document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
   document.getElementById('cd-mins').textContent = String(mins).padStart(2, '0');
   document.getElementById('cd-secs').textContent = String(secs).padStart(2, '0');
+  document.getElementById('cd-session').textContent = currentNextSession.session.name;
+  document.getElementById('cd-track').textContent = currentNextSession.round.track.toUpperCase();
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
 
-/* ---------------------------------------------------------
-   IGNITION — Start OS -> clock format prompt
---------------------------------------------------------- */
+// Track Wallpaper:
+
+const TRACK_SVGS = {
+  'Albert Park': `<path class="track-ribbon" d="M400,280 C300,270 200,280 150,340 C120,380 140,450 200,500 L300,500 C260,470 240,430 270,400 L280,310 L400,310 C430,280 440,250 400,280 Z"/>
+    <path class="track-centerline" d="M400,280 C300,270 200,280 150,340 C120,380 140,450 200,500 L300,500 C260,470 240,430 270,400 L280,310 L400,310 C430,280 440,250 400,280 Z"/>
+    <text x="140" y="370" class="track-label">T1</text><text x="280" y="480" class="track-label">T3</text><text x="400" y="320" class="track-label">T11</text>`,
+
+  'Shanghai': `<path class="track-ribbon" d="M500,250 C550,240 600,260 620,310 L620,440 C640,480 620,520 560,500 L440,460 C400,230 340,120 250,100 C150,80 130,180 180,240 C220,290 280,280 340,240 C380,210 420,160 440,140 L460,160 C460,200 450,280 460,360 L480,420 C500,440 530,420 540,380 L540,330 C540,280 530,250 500,250 Z"/>
+    <path class="track-centerline" d="M500,250 C550,240 600,260 620,310 L620,440 C640,480 620,520 560,500 L440,460 C400,230 340,120 250,100 C150,80 130,180 180,240 C220,290 280,280 340,240 C380,210 420,160 440,140 L460,160 C460,200 450,280 460,360 L480,420 C500,440 530,420 540,380 L540,330 C540,280 530,250 500,250 Z"/>
+    <text x="160" y="130" class="track-label">T1</text><text x="440" y="130" class="track-label">T7</text>`,
+
+  'Suzuka': `<path class="track-ribbon" d="M520,200 L520,60 C540,30 600,20 640,60 L620,100 C550,110 510,150 460,190 L380,250 C340,210 260,210 220,280 C170,370 200,440 280,500 C360,560 500,580 640,520 L660,460 C700,490 780,480 820,430 L800,390 C720,420 600,480 480,460 C380,440 280,380 260,300 C240,220 300,200 400,240 L460,280 L520,200 Z"/>
+    <path class="track-centerline" d="M520,200 L520,60 C540,30 600,20 640,60 L620,100 C550,110 510,150 460,190 L380,250 C340,210 260,210 220,280 C170,370 200,440 280,500 C360,560 500,580 640,520 L660,460 C700,490 780,480 820,430 L800,390 C720,420 600,480 480,460 C380,440 280,380 260,300 C240,220 300,200 400,240 L460,280 L520,200 Z"/>
+    <text x="600" y="80" class="track-label">130R</text><text x="200" y="350" class="track-label">S-CURVES</text>`,
+
+  'Miami': `<path class="track-ribbon" d="M500,120 L480,160 C440,200 400,240 440,300 L280,300 C240,330 260,380 320,420 C380,460 480,440 560,390 C620,350 640,300 560,260 L480,220 C420,180 440,150 460,120 L500,120 Z"/>
+    <path class="track-centerline" d="M500,120 L480,160 C440,200 400,240 440,300 L280,300 C240,330 260,380 320,420 C380,460 480,440 560,390 C620,350 640,300 560,260 L480,220 C420,180 440,150 460,120 L500,120 Z"/>
+    <text x="240" y="350" class="track-label">T1</text><text x="580" y="380" class="track-label">T11</text>`,
+
+  'Montreal': `<path class="track-ribbon" d="M500,200 C480,160 440,140 400,170 L400,220 C380,240 360,220 340,260 L180,360 C140,400 160,460 220,500 L400,540 C460,530 500,480 480,440 L460,300 C490,220 540,200 560,240 L540,280 C510,270 500,250 500,200 Z"/>
+    <path class="track-centerline" d="M500,200 C480,160 440,140 400,170 L400,220 C380,240 360,220 340,260 L180,360 C140,400 160,460 220,500 L400,540 C460,530 500,480 480,440 L460,300 C490,220 540,200 560,240 L540,280 C510,270 500,250 500,200 Z"/>
+    <text x="160" y="420" class="track-label">WALL OF CHAMPIONS</text>`,
+
+  'Monaco': `<path class="track-ribbon" d="M620,440 L620,360 L580,360 C560,380 560,420 500,420 L480,460 C420,520 360,520 300,480 C240,440 220,360 280,300 L340,240 C380,200 440,200 480,240 L520,280 L540,360 C520,380 500,380 460,360 L480,320 L580,280 L600,260 L620,280 Z"/>
+    <path class="track-centerline" d="M620,440 L620,360 L580,360 C560,380 560,420 500,420 L480,460 C420,520 360,520 300,480 C240,440 220,360 280,300 L340,240 C380,200 440,200 480,240 L520,280 L540,360 C520,380 500,380 460,360 L480,320 L580,280 L600,260 L620,280 Z"/>
+    <text x="240" y="370" class="track-label">CASINO</text><text x="460" y="150" class="track-label">TUNNEL</text>`,
+
+  'Barcelona': `<path class="track-ribbon" d="M600,300 L600,140 C580,100 500,80 440,120 L360,180 C320,220 320,280 380,320 C440,360 520,340 560,280 C600,240 560,180 500,180 C440,180 440,220 440,280 C440,340 480,400 560,420 C640,440 700,380 700,320 L800,320 L800,280 L700,280 L600,300 Z"/>
+    <path class="track-centerline" d="M600,300 L600,140 C580,100 500,80 440,120 L360,180 C320,220 320,280 380,320 C440,360 520,340 560,280 C600,240 560,180 500,180 C440,180 440,220 440,280 C440,340 480,400 560,420 C640,440 700,380 700,320 L800,320 L800,280 L700,280 L600,300 Z"/>
+    <text x="620" y="130" class="track-label">T1</text><text x="370" y="270" class="track-label">T7</text>`,
+
+  'Spielberg': `<path class="track-ribbon" d="M480,100 C380,80 280,140 340,240 C380,310 280,380 300,440 C320,500 420,520 500,480 L520,380 C500,320 560,280 620,220 C680,160 700,100 620,100 C560,100 520,140 500,180 L480,140 C480,120 480,100 480,100 Z"/>
+    <path class="track-centerline" d="M480,100 C380,80 280,140 340,240 C380,310 280,380 300,440 C320,500 420,520 500,480 L520,380 C500,320 560,280 620,220 C680,160 700,100 620,100 C560,100 520,140 500,180 L480,140 C480,120 480,100 480,100 Z"/>
+    <text x="280" y="200" class="track-label">T1</text><text x="640" y="200" class="track-label">T7</text>`,
+
+  'Spa': `<path class="track-ribbon" d="M520,80 L520,180 C550,200 600,190 640,160 L640,80 L720,140 C780,180 820,260 780,340 C740,420 660,460 580,430 C500,400 440,340 420,260 C400,180 440,120 520,80 Z"/>
+    <path class="track-centerline" d="M520,80 L520,180 C550,200 600,190 640,160 L640,80 L720,140 C780,180 820,260 780,340 C740,420 660,460 580,430 C500,400 440,340 420,260 C400,180 440,120 520,80 Z"/>
+    <text x="660" y="200" class="track-label">EAU ROUGE</text><text x="280" y="350" class="track-label">LES COMBES</text>`,
+
+  'Budapest': `<path class="track-ribbon" d="M500,100 C420,80 340,100 280,180 C220,260 260,340 340,380 L440,400 C500,420 520,380 520,340 C520,300 480,280 440,300 C400,320 360,360 340,320 C320,280 360,220 400,200 C440,180 480,160 480,120 L500,100 Z"/>
+    <path class="track-centerline" d="M500,100 C420,80 340,100 280,180 C220,260 260,340 340,380 L440,400 C500,420 520,380 520,340 C520,300 480,280 440,300 C400,320 360,360 340,320 C320,280 360,220 400,200 C440,180 480,160 480,120 L500,100 Z"/>
+    <text x="260" y="220" class="track-label">T1</text><text x="500" y="360" class="track-label">T4</text>`,
+
+  'Zandvoort': `<path class="track-ribbon" d="M440,120 L560,120 C640,120 700,180 700,280 L700,400 L640,480 C580,540 460,500 440,440 C420,380 460,320 500,300 C540,280 540,240 520,200 C500,160 460,140 440,120 Z"/>
+    <path class="track-centerline" d="M440,120 L560,120 C640,120 700,180 700,280 L700,400 L640,480 C580,540 460,500 440,440 C420,380 460,320 500,300 C540,280 540,240 520,200 C500,160 460,140 440,120 Z"/>
+    <text x="600" y="160" class="track-label">T1</text><text x="480" y="400" class="track-label">T13</text>`,
+
+  'Monza': `<path class="track-ribbon" d="M580,140 L640,140 C700,140 760,180 800,260 L800,380 L740,460 C680,500 620,460 600,400 L580,340 L580,260 C640,200 580,140 580,140 Z"/>
+    <path class="track-centerline" d="M580,140 L640,140 C700,140 760,180 800,260 L800,380 L740,460 C680,500 620,460 600,400 L580,340 L580,260 C640,200 580,140 580,140 Z"/>
+    <text x="790" y="300" class="track-label">PARABOLICA</text><text x="560" y="180" class="track-label">CHICANE</text>`,
+
+  'Madrid': `<path class="track-ribbon" d="M450,500 C300,480 180,400 200,300 C220,200 320,120 420,100 C520,80 600,160 640,260 C680,360 600,440 500,460 L460,400 C520,380 580,320 560,260 C540,200 480,160 440,180 C400,200 340,260 300,340 C280,380 360,440 420,460 L450,500 Z"/>
+    <path class="track-centerline" d="M450,500 C300,480 180,400 200,300 C220,200 320,120 420,100 C520,80 600,160 640,260 C680,360 600,440 500,460 L460,400 C520,380 580,320 560,260 C540,200 480,160 440,180 C400,200 340,260 300,340 C280,380 360,440 420,460 L450,500 Z"/>
+    <text x="600" y="230" class="track-label">T1</text><text x="180" y="360" class="track-label">T7</text>`,
+
+  'Baku': `<path class="track-ribbon" d="M560,500 L700,500 L700,200 C760,150 840,150 880,200 L880,360 C830,440 720,460 640,420 L580,380 L560,420 C560,460 560,500 560,500 Z"/>
+    <path class="track-centerline" d="M560,500 L700,500 L700,200 C760,150 840,150 880,200 L880,360 C830,440 720,460 640,420 L580,380 L560,420 C560,460 560,500 560,500 Z"/>
+    <text x="880" y="280" class="track-label">CASTLE</text><text x="700" y="480" class="track-label">START</text>`,
+
+  'Singapore': `<path class="track-ribbon" d="M500,120 L500,240 C440,300 380,280 340,200 C300,120 340,60 440,60 C540,60 640,80 700,160 L700,320 C640,400 540,420 440,380 C340,340 280,260 240,180 C200,100 240,60 340,60 L400,60 Z"/>
+    <path class="track-centerline" d="M500,120 L500,240 C440,300 380,280 340,200 C300,120 340,60 440,60 C540,60 640,80 700,160 L700,320 C640,400 540,420 440,380 C340,340 280,260 240,180 C200,100 240,60 340,60 L400,60 Z"/>
+    <text x="240" y="120" class="track-label">T1</text><text x="620" y="360" class="track-label">T13</text>`,
+
+  'Austin': `<path class="track-ribbon" d="M480,80 L680,80 L800,140 C850,170 880,220 840,280 C800,340 720,380 640,380 L480,360 C360,340 280,260 280,160 C280,80 360,60 480,80 Z"/>
+    <path class="track-centerline" d="M480,80 L680,80 L800,140 C850,170 880,220 840,280 C800,340 720,380 640,380 L480,360 C360,340 280,260 280,160 C280,80 360,60 480,80 Z"/>
+    <text x="840" y="230" class="track-label">T1</text><text x="280" y="220" class="track-label">T12</text>`,
+
+  'Mexico City': `<path class="track-ribbon" d="M600,100 L720,100 C780,100 820,150 820,220 L820,340 C820,400 780,440 700,420 L620,380 L560,300 C520,260 520,220 560,200 C600,180 600,140 600,100 Z"/>
+    <path class="track-centerline" d="M600,100 L720,100 C780,100 820,150 820,220 L820,340 C820,400 780,440 700,420 L620,380 L560,300 C520,260 520,220 560,200 C600,180 600,140 600,100 Z"/>
+    <text x="820" y="300" class="track-label">FORO SOL</text><text x="540" y="250" class="track-label">T1</text>`,
+
+  'Interlagos': `<path class="track-ribbon" d="M640,120 C560,100 480,100 400,160 L300,260 C240,330 260,420 340,460 L460,500 C560,530 660,480 700,420 L680,380 L580,320 C540,280 540,200 580,160 L640,120 Z"/>
+    <path class="track-centerline" d="M640,120 C560,100 480,100 400,160 L300,260 C240,330 260,420 340,460 L460,500 C560,530 660,480 700,420 L680,380 L580,320 C540,280 540,200 580,160 L640,120 Z"/>
+    <text x="300" y="320" class="track-label">SENNA S</text><text x="560" y="400" class="track-label">T4</text>`,
+
+  'Las Vegas': `<path class="track-ribbon" d="M700,500 L700,140 L840,100 C880,80 920,100 940,150 L940,400 C940,450 880,480 840,470 L740,440 C700,420 680,380 700,360 L740,340 L740,200 L700,240 L680,200 C680,300 700,440 700,500 Z"/>
+    <path class="track-centerline" d="M700,500 L700,140 L840,100 C880,80 920,100 940,150 L940,400 C940,450 880,480 840,470 L740,440 C700,420 680,380 700,360 L740,340 L740,200 L700,240 L680,200 C680,300 700,440 700,500 Z"/>
+    <text x="920" y="280" class="track-label">STRIP</text><text x="700" y="180" class="track-label">T1</text>`,
+
+  'Lusail': `<path class="track-ribbon" d="M520,100 C640,80 760,120 820,200 C880,280 840,400 760,460 C680,520 560,500 480,440 C400,380 340,280 340,180 C340,120 400,100 520,100 Z"/>
+    <path class="track-centerline" d="M520,100 C640,80 760,120 820,200 C880,280 840,400 760,460 C680,520 560,500 480,440 C400,380 340,280 340,180 C340,120 400,100 520,100 Z"/>
+    <text x="820" y="240" class="track-label">T1</text><text x="340" y="340" class="track-label">T10</text>`,
+
+  'Abu Dhabi': `<path class="track-ribbon" d="M500,80 L780,80 C840,80 880,140 880,220 C880,300 840,360 780,380 L600,440 C540,480 480,520 440,540 C400,560 360,540 340,500 C320,460 320,400 340,340 C360,280 300,220 220,180 C140,140 80,140 60,160 L40,140 C80,60 200,80 300,160 C350,200 380,260 380,320 L500,240 L500,80 Z"/>
+    <path class="track-centerline" d="M500,80 L780,80 C840,80 880,140 880,220 C880,300 840,360 780,380 L600,440 C540,480 480,520 440,540 C400,560 360,540 340,500 C320,460 320,400 340,340 C360,280 300,220 220,180 C140,140 80,140 60,160 L40,140 C80,60 200,80 300,160 C350,200 380,260 380,320 L500,240 L500,80 Z"/>
+    <text x="800" y="280" class="track-label">S1</text><text x="380" y="420" class="track-label">S3</text>`,
+
+  'Silverstone': `<path class="track-ribbon" d="M120,420 C60,380 60,300 130,270 C190,244 210,190 180,140 C150,90 200,40 270,55 C330,68 350,120 400,120 C460,120 470,60 540,50 C610,40 660,90 630,140 C605,182 640,210 700,215 C775,222 830,180 860,230 C892,283 850,330 780,335 C715,340 690,300 640,320 C585,342 590,400 530,410 C470,420 460,370 400,375 C335,381 330,440 260,445 C190,450 175,455 120,420 Z"/>
+    <path class="track-centerline" d="M120,420 C60,380 60,300 130,270 C190,244 210,190 180,140 C150,90 200,40 270,55 C330,68 350,120 400,120 C460,120 470,60 540,50 C610,40 660,90 630,140 C605,182 640,210 700,215 C775,222 830,180 860,230 C892,283 850,330 780,335 C715,340 690,300 640,320 C585,342 590,400 530,410 C470,420 460,370 400,375 C335,381 330,440 260,445 C190,450 175,455 120,420 Z"/>
+    <text x="145" y="405" class="track-label">CLUB</text><text x="120" y="230" class="track-label">MAGGOTTS-BECKETTS</text><text x="330" y="45" class="track-label">COPSE</text><text x="600" y="115" class="track-label">HANGAR STRAIGHT</text><text x="820" y="255" class="track-label">STOWE</text>`
+};
+
+function applyTrackWallpaper(trackName) {
+  const svg = document.getElementById('track-svg');
+  if (!svg) return;
+  const svgData = TRACK_SVGS[trackName] || TRACK_SVGS['Silverstone'];
+  svg.innerHTML = svgData;
+}
+
+function initializeTrackWallpaper() {
+  if (currentNextSession) {
+    applyTrackWallpaper(currentNextSession.round.track);
+  }
+}
+
+// Start OS screen
 
 function initializeIgnition() {
   const igniteBtn = document.getElementById('ignition-btn');
-  const stageStart = document.getElementById('stage-start');
-  const stageFormat = document.getElementById('stage-format');
+  const ignitionScreen = document.getElementById('ignition-screen');
+  const formatScreen = document.getElementById('format-screen');
 
   igniteBtn.addEventListener('click', () => {
     igniteBtn.classList.add('firing');
     setTimeout(() => {
-      stageStart.hidden = true;
-      stageFormat.hidden = false;
+      ignitionScreen.classList.add('hidden');
+      setTimeout(() => { ignitionScreen.style.display = 'none'; }, 650);
+      formatScreen.style.display = '';
+      formatScreen.style.opacity = '1';
+      formatScreen.querySelector('.ignition-stage').style.animation = 'none';
+      void formatScreen.offsetWidth;
+      formatScreen.querySelector('.ignition-stage').style.animation = 'fade-in-stage 0.4s ease';
     }, 350);
   });
 
@@ -95,17 +409,14 @@ function finishIgnition(format) {
   clockFormat = format;
   updateClock();
 
-  const ignitionScreen = document.getElementById('ignition-screen');
-  ignitionScreen.classList.add('hidden');
-  setTimeout(() => { ignitionScreen.style.display = 'none'; }, 650);
+  const formatScreen = document.getElementById('format-screen');
+  formatScreen.classList.add('hidden');
+  setTimeout(() => { formatScreen.style.display = 'none'; }, 650);
 
-  // Open the guide window as the first thing the driver sees.
   openWindow(document.getElementById('welcome'));
 }
 
-/* ---------------------------------------------------------
-   WINDOW MANAGER
---------------------------------------------------------- */
+// Window management
 
 function bringToFront(win) {
   biggestIndex += 1;
@@ -163,7 +474,7 @@ function toggleMaximizeWindow(win) {
   bringToFront(win);
 }
 
-/* ---- Window tap handling -------------------------------- */
+// Window handling
 
 function handleWindowTap(win) {
   bringToFront(win);
@@ -173,9 +484,7 @@ function addWindowTapHandling(win) {
   win.addEventListener('mousedown', () => handleWindowTap(win));
 }
 
-/* ---- Dragging --------------------------------------------
-   Dragging is initiated only from the window header.
---------------------------------------------------------- */
+// Dragging windows:
 
 function dragElement(win, header) {
   let offsetX = 0, offsetY = 0;
@@ -222,7 +531,7 @@ function dragElement(win, header) {
   }
 }
 
-/* ---- Window controls: minimize / maximize / close ---------- */
+// Window controls:
 
 function enableWindowControls(win) {
   const minBtn = win.querySelector('.btn-minimize');
@@ -238,8 +547,6 @@ function enableWindowControls(win) {
   if (maxBtn) maxBtn.addEventListener('click', () => toggleMaximizeWindow(win));
   if (closeBtn) closeBtn.addEventListener('click', () => closeWindowFull(win));
 }
-
-/* ---- Reusable window initialization ----------------------- */
 
 function initializeWindow(windowName) {
   const win = document.getElementById(windowName);
@@ -257,9 +564,8 @@ function initializeWindow(windowName) {
   enableWindowControls(win);
 }
 
-/* ---------------------------------------------------------
-   TASKBAR
---------------------------------------------------------- */
+// Taskbar
+
 
 function updateTaskbar() {
   document.querySelectorAll('.taskbar-icon').forEach((icon) => {
@@ -295,10 +601,8 @@ function initializeTaskbarIcon(name) {
   });
 }
 
-/* ---------------------------------------------------------
-   APPLICATION: WELCOME / APP GUIDE
-   Explains each application in the OS.
---------------------------------------------------------- */
+// Welcome App: Explains each application in the OS to the user.
+
 
 const appGuide = [
   {
@@ -370,11 +674,10 @@ function initializeGuideApp() {
   setGuideContent(0);
 }
 
-/* ---------------------------------------------------------
-   APPLICATION: GARAGE — dynamic content architecture
-   The garage starts with exactly one car. More can be added
-   via the "+ ADD CAR" button (Custom Build or Browse Collection).
---------------------------------------------------------- */
+
+/* Application: Garage — A place where you can add cars with their specs and details. 
+(Since this is a small probject I hard coded it instead of using a database.) */
+
 
 const garageCars = [
   {
@@ -527,9 +830,9 @@ function initializeGarageApp() {
   setContent(0);
 }
 
-/* ---------------------------------------------------------
-   APPLICATION: ADD CAR — Custom Build & Browse Collection
---------------------------------------------------------- */
+
+//  Application: Add a car: Custom Build or Browse Collection
+
 
 function initializeAddCarApp() {
   const addCarBtn = document.getElementById('btn-add-car');
@@ -618,13 +921,9 @@ function renderBrowseGrid() {
   });
 }
 
-/* ---------------------------------------------------------
-   APPLICATION: LIGHTS OUT — F1-style reaction time trainer
-   Five lights illuminate one at a time. A random hold follows
-   the fifth light, then all five extinguish together — that's
-   the "go" signal. Click before they go out and it's a false
-   start; click after, and your reaction time is measured.
---------------------------------------------------------- */
+
+// Application: LIGHTS OUT — F1-style reaction time tester
+
 
 let loState = 'idle';       // idle | armed | waiting | go | result | falseStart
 let loTimers = [];
@@ -775,12 +1074,13 @@ function initializeLightsOutApp() {
   loRenderHistory();
 }
 
-/* ---------------------------------------------------------
-   BOOT
---------------------------------------------------------- */
+// Boot up:
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeIgnition();
+
+  // Track wallpaper — set to the circuit of the next session
+  initializeTrackWallpaper();
 
   // Windows
   initializeWindow('welcome');
