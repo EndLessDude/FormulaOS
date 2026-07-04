@@ -3,8 +3,8 @@ let activeWindowId = null;
 let clockFormat = '24';
 
 const topBar = document.getElementById('topbar');
-const TOPBAR_H = 40;
-const TASKBAR_H = 56;
+const TOPBAR_H = 36;
+const TASKBAR_H = 44;
 
 const windowMeta = {};
 
@@ -391,13 +391,16 @@ function initializeIgnition() {
     igniteBtn.classList.add('firing');
     setTimeout(() => {
       ignitionScreen.classList.add('hidden');
-      setTimeout(() => { ignitionScreen.style.display = 'none'; }, 650);
-      formatScreen.style.display = '';
+      setTimeout(() => { ignitionScreen.style.display = 'none'; }, 450);
+      formatScreen.removeAttribute('hidden');
+      formatScreen.style.display = 'flex';
+      formatScreen.style.opacity = '0';
+      void formatScreen.offsetWidth;
       formatScreen.style.opacity = '1';
       formatScreen.querySelector('.ignition-stage').style.animation = 'none';
       void formatScreen.offsetWidth;
-      formatScreen.querySelector('.ignition-stage').style.animation = 'fade-in-stage 0.4s ease';
-    }, 350);
+      formatScreen.querySelector('.ignition-stage').style.animation = 'stage-enter 0.35s ease';
+    }, 200);
   });
 
   document.querySelectorAll('.format-btn').forEach((btn) => {
@@ -411,7 +414,7 @@ function finishIgnition(format) {
 
   const formatScreen = document.getElementById('format-screen');
   formatScreen.classList.add('hidden');
-  setTimeout(() => { formatScreen.style.display = 'none'; }, 650);
+  setTimeout(() => { formatScreen.style.display = 'none'; }, 450);
 
   openWindow(document.getElementById('welcome'));
 }

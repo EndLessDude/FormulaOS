@@ -11,27 +11,17 @@
 </head>
 <body>
 
-<!--Ignition Screen: The Welcome OS screen that opens at startup -->
+<!-- Ignition Screen -->
 <div id="ignition-screen">
-
-    <div class="ignition-bg">
-      <div class="ignition-grid"></div>
-      <div class="ignition-glow"></div>
-    </div>
 
     <div class="ignition-stage" id="stage-start">
       <div class="dial-wrap">
-        <svg viewBox="0 0 240 240" class="dial-svg">
-          <circle cx="120" cy="120" r="104" fill="none" stroke="rgba(241,242,244,0.08)" stroke-width="2"/>
-          <circle cx="120" cy="120" r="104" fill="none" stroke="var(--red)" stroke-width="2"
-                  stroke-dasharray="20 8" opacity="0.5"/>
-        </svg>
         <button id="ignition-btn" aria-label="Start OS">
           <span class="ignition-btn-ring"></span>
           <span class="ignition-btn-core">
             <svg viewBox="0 0 40 40" class="ignition-icon">
-              <path d="M20 4 V20 L30 26" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/>
-              <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="3"/>
+              <path d="M20 4 V20 L30 26" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
             </svg>
             <span class="ignition-btn-text">START<br>OS</span>
           </span>
@@ -42,13 +32,8 @@
 
   </div>
 
-  <!-- clock format picker, loads after ignition-->
-  <div id="format-screen" style="display:none">
-
-    <div class="ignition-bg">
-      <div class="ignition-grid"></div>
-      <div class="ignition-glow"></div>
-    </div>
+  <!-- Format Screen -->
+  <div id="format-screen" hidden>
 
     <div class="ignition-stage">
       <div class="format-panel">
@@ -73,10 +58,8 @@
 <!-- DESKTOP-->
 <div id="desktop">
 
-  <!-- Wallpaper: Silverstone circuit layout -->
+  <!-- Wallpaper -->
   <div id="wallpaper">
-    <div class="wallpaper-grid"></div>
-    <div class="wallpaper-glow"></div>
 
     <svg id="track-svg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice">
       <!-- populated dynamically by script.js -->
