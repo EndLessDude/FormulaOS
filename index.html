@@ -3,10 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RaceOS — Pit Wall</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Titillium+Web:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<title>FormulaOS</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,11 +20,11 @@
               <path d="M20 4 V20 L30 26" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/>
               <circle cx="20" cy="20" r="16" fill="none" stroke="currentColor" stroke-width="2.2"/>
             </svg>
-            <span class="ignition-btn-text">START<br>OS</span>
+            <span class="ignition-btn-text">Start<br>FormulaOS</span>
           </span>
         </button>
       </div>
-      <p class="ignition-hint">RACEOS</p>
+      <p class="ignition-hint">Welcome to FormulaOS</p>
     </div>
 
   </div>
@@ -37,9 +34,7 @@
 
     <div class="ignition-stage">
       <div class="format-panel">
-        <div class="welcome-eyebrow">DASH CONFIGURATION</div>
-        <h2 class="format-title">Set your clock format</h2>
-        <p class="format-sub">This controls how the live clock reads on the pit wall top bar.</p>
+        <h2 class="format-title">Set your clock format: </h2>
         <div class="format-options">
           <button class="format-btn" data-format="12">
             <span class="format-btn-time">7:04 PM</span>
@@ -58,20 +53,13 @@
 <!-- DESKTOP-->
 <div id="desktop">
 
-  <!-- Wallpaper -->
-  <div id="wallpaper">
-
-    <svg id="track-svg" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid slice">
-      <!-- populated dynamically by script.js -->
-    </svg>
-  </div>
+  <!---- Wallpaper -->
+  <div id="wallpaper"></div>
 
   <!-- Top Bar -->
   <header id="topbar">
     <div class="topbar-left">
-      <span class="topbar-logo">RACE<span class="accent">OS</span></span>
-      <span class="topbar-divider">|</span>
-      <span class="topbar-status"><span class="status-dot"></span>Engine Running</span>
+      <span class="topbar-logo">Formula<span class="accent">OS</span></span>
     </div>
     <div class="topbar-right">
       <span id="clock" class="topbar-clock">00:00:00</span>
@@ -80,7 +68,7 @@
 
   <!-- Race Countdown — top right -->
   <div class="race-countdown" id="race-countdown">
-    <div class="countdown-eyebrow">NEXT SESSION</div>
+    <div class="countdown-eyebrow">Countdown: </div>
     <div class="countdown-session"><span id="cd-session">--</span> <span class="accent">·</span> <span id="cd-track">--</span></div>
     <div class="countdown-clock">
       <div class="countdown-unit"><span id="cd-days">00</span><label>DAYS</label></div>
@@ -93,7 +81,7 @@
   <!--Welcome-->
   <section class="window" id="welcome">
     <div class="windowheader" id="welcomeheader">
-      <span class="headertext">GUIDE.SYS — APPLICATION DIRECTORY</span>
+      <span class="headertext">Welcome</span>
       <div class="windowcontrols">
         <button class="winctrl btn-minimize" title="Minimize" data-target="welcome">
           <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -106,122 +94,40 @@
         </button>
       </div>
     </div>
-    <div class="windowcontent guide-body">
-      <nav class="garage-sidebar" id="guide-sidebar">
-        <!-- populated dynamically by script.js -->
-      </nav>
-      <div class="garage-display" id="guide-display">
-        <!-- populated dynamically by script.js -->
+    <div class="windowcontent welcome-body">
+      <div class="welcome-message">
+        <p>FormulaOS is an Operating System that runs on the web and is built around the theme of Formula 1. I made it with this theme due to my love for the sport. Check out the apps I created!</p>
+        <p>Also the wallpaper featured the Mercedes driver doing the famous T pose during the 2025 F1 intro.</p>
       </div>
     </div>
   </section>
 
   <!-- Garage-->
-  <section class="window" id="garage">
-    <div class="windowheader" id="garageheader">
-      <span class="headertext">GARAGE.APP — CAR COLLECTION</span>
+  <!-- ===================== WINDOW: F1 QUIZ ===================== -->
+  <section class="window" id="quiz">
+    <div class="windowheader" id="quizheader">
+      <span class="headertext">F1 Quiz</span>
       <div class="windowcontrols">
-        <button class="winctrl btn-minimize" title="Minimize" data-target="garage">
+        <button class="winctrl btn-minimize" title="Minimize" data-target="quiz">
           <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
         </button>
-        <button class="winctrl btn-maximize" title="Maximize" data-target="garage">
+        <button class="winctrl btn-maximize" title="Maximize" data-target="quiz">
           <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
         </button>
-        <button class="winctrl btn-close" title="Close" data-target="garage">
+        <button class="winctrl btn-close" title="Close" data-target="quiz">
           <svg viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/></svg>
         </button>
       </div>
     </div>
-    <div class="windowcontent garage-content-wrap">
-
-      <div class="garage-toolbar">
-        <span class="toolbar-label">YOUR GARAGE — <span id="garage-count">1</span> CAR(S)</span>
-        <button class="btn-add-car" id="btn-add-car">+ ADD CAR</button>
-      </div>
-
-      <div class="garage-body">
-        <nav class="garage-sidebar" id="garage-sidebar"></nav>
-        <div class="garage-display" id="garage-display"></div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- Add car feature for the garage-->
-  <section class="window" id="addcar">
-    <div class="windowheader" id="addcarheader">
-      <span class="headertext">ADD CAR — GARAGE.APP</span>
-      <div class="windowcontrols">
-        <button class="winctrl btn-minimize" title="Minimize" data-target="addcar">
-          <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
-        </button>
-        <button class="winctrl btn-maximize" title="Maximize" data-target="addcar">
-          <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
-        </button>
-        <button class="winctrl btn-close" title="Close" data-target="addcar">
-          <svg viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="windowcontent addcar-content">
-
-      <div class="addcar-tabs">
-        <button class="addcar-tab active" data-tab="custom">CUSTOM BUILD</button>
-        <button class="addcar-tab" data-tab="browse">BROWSE COLLECTION</button>
-      </div>
-
-      <div class="addcar-panel active" id="panel-custom">
-        <div class="form-row">
-          <label for="input-name">Car name</label>
-          <input type="text" id="input-name" placeholder="e.g. Nissan GT-R NISMO GT3">
-        </div>
-        <div class="form-row form-row-split">
-          <div>
-            <label for="input-class">Class</label>
-            <select id="input-class">
-              <option>GT3 — Endurance</option>
-              <option>GT3 — Sprint</option>
-              <option>GT3 — All-rounder</option>
-              <option>GTE — Endurance</option>
-              <option>Hypercar — LMDh</option>
-              <option>Prototype — Open</option>
-            </select>
-          </div>
-          <div>
-            <label for="input-power">Power (HP)</label>
-            <input type="number" id="input-power" placeholder="550">
-          </div>
-        </div>
-        <div class="form-row form-row-split">
-          <div>
-            <label for="input-weight">Weight (KG)</label>
-            <input type="number" id="input-weight" placeholder="1280">
-          </div>
-          <div>
-            <label for="input-topspeed">Top speed (MPH)</label>
-            <input type="number" id="input-topspeed" placeholder="185">
-          </div>
-        </div>
-        <div class="form-row">
-          <label for="input-notes">Notes</label>
-          <textarea id="input-notes" rows="3" placeholder="Setup notes, character, history..."></textarea>
-        </div>
-        <button class="btn-primary" id="submit-custom-car">ADD TO GARAGE</button>
-      </div>
-
-      <div class="addcar-panel" id="panel-browse">
-        <div class="browse-grid" id="browse-grid">
-          <!-- populated dynamically by script.js -->
-        </div>
-      </div>
-
+    <div class="windowcontent quiz-body">
+      <div id="quiz-display" class="quiz-display"></div>
     </div>
   </section>
 
   <!-- Lights Out-->
   <section class="window" id="lightsout">
     <div class="windowheader" id="lightsoutheader">
-      <span class="headertext">LIGHTS OUT — REACTION TRAINER</span>
+      <span class="headertext">Lights Out</span>
       <div class="windowcontrols">
         <button class="winctrl btn-minimize" title="Minimize" data-target="lightsout">
           <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
@@ -245,7 +151,7 @@
             <div class="lo-light" data-index="3"><span></span></div>
             <div class="lo-light" data-index="4"><span></span></div>
           </div>
-          <div class="lo-status" id="lo-status">PRESS START SEQUENCE</div>
+          <div class="lo-status" id="lo-status">Start</div>
           <div class="lo-readout">
             <span id="lo-result-value">--</span>
             <span class="lo-readout-unit">ms</span>
@@ -253,71 +159,99 @@
           <div class="lo-grade" id="lo-grade"></div>
         </div>
 
-        <button class="btn-primary lo-start-btn" id="lo-start-btn">START SEQUENCE</button>
+        <button class="btn-primary lo-start-btn" id="lo-start-btn">Start</button>
       </div>
 
       <aside class="lo-sidebar">
         <div class="lo-stat-box">
-          <span class="spec-label">PERSONAL BEST</span>
+          <span class="spec-label">Personal Best:</span>
           <span class="spec-value" id="lo-best">-- ms</span>
         </div>
 
-        <div class="lo-history-label">LAST ATTEMPTS</div>
+        <div class="lo-history-label">Last Attempts:</div>
         <div class="lo-history" id="lo-history">
           <div class="lo-history-empty">No attempts yet.</div>
         </div>
 
         <div class="lo-rules">
-          <p class="lo-rules-title">HOW IT WORKS</p>
-          <p>Five lights illuminate one at a time, just like a real Grand Prix start. Click anywhere
-            on the rig too early and it's a false start. Wait until all five go dark, then click as
-            fast as you can — your reaction is timed in milliseconds.</p>
+          <p class="lo-rules-title">How to play:</p>
+          <p>Wait for all 5 lights to go out, and then click inside the box as fast as you can.</p>
         </div>
       </aside>
 
     </div>
   </section>
 
+  <!-- ===================== WINDOW: CHAMPIONS ===================== -->
+  <section class="window" id="champions">
+    <div class="windowheader" id="championsheader">
+      <span class="headertext">Champions</span>
+      <div class="windowcontrols">
+        <button class="winctrl btn-minimize" title="Minimize" data-target="champions">
+          <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-maximize" title="Maximize" data-target="champions">
+          <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-close" title="Close" data-target="champions">
+          <svg viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="windowcontent champions-body">
+      <div id="champions-display" class="champions-display"></div>
+    </div>
+  </section>
+
 </div>
 
-<!-- Taskbar-->
+<!-- Dock -->
 <nav id="taskbar">
-    <div class="taskbar-icon" id="icon-welcome" data-window="welcome">
-      <div class="icon-shape">
-        <svg viewBox="0 0 64 64" class="icon-glyph">
-          <path d="M32 6 C20 6 12 16 12 28 C12 40 20 50 32 50 C44 50 52 40 52 28 C52 16 44 6 32 6 Z" fill="none" stroke="currentColor" stroke-width="2.5"/>
-          <path d="M12 28 H52 M32 6 V50" stroke="currentColor" stroke-width="1.8" opacity="0.6"/>
-          <rect x="24" y="50" width="16" height="8" rx="1" fill="currentColor" opacity="0.85"/>
-        </svg>
-      </div>
-      <span class="icon-label">Welcome</span>
+  <button class="dock-item dock-welcome" id="icon-welcome" data-window="welcome" title="Welcome">
+    <div class="dock-icon">
+      <span class="dock-letter">W</span>
     </div>
+    <span class="dock-tooltip">Welcome</span>
+  </button>
 
-    <div class="taskbar-icon" id="icon-garage" data-window="garage">
-      <div class="icon-shape">
-        <svg viewBox="0 0 64 64" class="icon-glyph">
-          <circle cx="20" cy="44" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
-          <circle cx="44" cy="44" r="5.5" fill="none" stroke="currentColor" stroke-width="2.5"/>
-          <path d="M10 44 L14 26 L24 16 H40 L50 26 L54 44" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M18 30 H46" stroke="currentColor" stroke-width="1.8" opacity="0.6"/>
-        </svg>
-      </div>
-      <span class="icon-label">Garage</span>
+  <button class="dock-item dock-quiz" id="icon-quiz" data-window="quiz" title="F1 Quiz">
+    <div class="dock-icon">
+      <svg viewBox="0 0 64 64" class="dock-glyph" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="32" cy="32" r="24"/>
+        <path d="M27 27 q0 -7 5 -7 q5 0 5 5 q0 5 -7 6 v3"/>
+        <line x1="32" y1="38" x2="32" y2="42"/>
+      </svg>
     </div>
+    <span class="dock-tooltip">F1 Quiz</span>
+  </button>
 
-    <div class="taskbar-icon" id="icon-lightsout" data-window="lightsout">
-      <div class="icon-shape">
-        <svg viewBox="0 0 64 64" class="icon-glyph">
-          <rect x="10" y="24" width="44" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2.5"/>
-          <circle cx="20" cy="32" r="4" fill="currentColor"/>
-          <circle cx="32" cy="32" r="4" fill="currentColor"/>
-          <circle cx="44" cy="32" r="4" fill="currentColor"/>
-        </svg>
-      </div>
-      <span class="icon-label">Lights Out</span>
+  <button class="dock-item dock-lightsout" id="icon-lightsout" data-window="lightsout" title="Lights Out">
+    <div class="dock-icon">
+      <svg viewBox="0 0 64 64" class="dock-glyph" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="6" y="22" width="52" height="20" rx="6"/>
+        <circle cx="18" cy="32" r="3.5" fill="currentColor" stroke="none"/>
+        <circle cx="32" cy="32" r="3.5" fill="currentColor" stroke="none"/>
+        <circle cx="46" cy="32" r="3.5" fill="currentColor" stroke="none"/>
+      </svg>
     </div>
-  </nav>
+    <span class="dock-tooltip">Lights Out</span>
+  </button>
+
+  <button class="dock-item dock-champions" id="icon-champions" data-window="champions" title="Champions">
+    <div class="dock-icon">
+      <svg viewBox="0 0 64 64" class="dock-glyph" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 14 H46 V24 C46 32 40 38 32 38 C24 38 18 32 18 24 Z"/>
+        <path d="M18 20 H10 V26 C10 32 14 36 18 36"/>
+        <path d="M46 20 H54 V26 C54 32 50 36 46 36"/>
+        <line x1="32" y1="38" x2="32" y2="46"/>
+        <line x1="24" y1="50" x2="40" y2="50"/>
+        <line x1="26" y1="46" x2="38" y2="46"/>
+      </svg>
+    </div>
+    <span class="dock-tooltip">Champions</span>
+  </button>
+</nav>
 
 <script src="script.js"></script>
 </body>
-</html>   
+</html>

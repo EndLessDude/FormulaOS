@@ -4,7 +4,7 @@ let clockFormat = '24';
 
 const topBar = document.getElementById('topbar');
 const TOPBAR_H = 36;
-const TASKBAR_H = 44;
+const TASKBAR_H = 78;
 
 const windowMeta = {};
 
@@ -367,18 +367,8 @@ const TRACK_SVGS = {
     <text x="145" y="405" class="track-label">CLUB</text><text x="120" y="230" class="track-label">MAGGOTTS-BECKETTS</text><text x="330" y="45" class="track-label">COPSE</text><text x="600" y="115" class="track-label">HANGAR STRAIGHT</text><text x="820" y="255" class="track-label">STOWE</text>`
 };
 
-function applyTrackWallpaper(trackName) {
-  const svg = document.getElementById('track-svg');
-  if (!svg) return;
-  const svgData = TRACK_SVGS[trackName] || TRACK_SVGS['Silverstone'];
-  svg.innerHTML = svgData;
-}
-
-function initializeTrackWallpaper() {
-  if (currentNextSession) {
-    applyTrackWallpaper(currentNextSession.round.track);
-  }
-}
+function applyTrackWallpaper(trackName) { /* deprecated — kept as a no-op */ }
+function initializeTrackWallpaper() { /* deprecated — wallpaper is now static */ }
 
 // Start OS screen
 
@@ -571,13 +561,11 @@ function initializeWindow(windowName) {
 
 
 function updateTaskbar() {
-  document.querySelectorAll('.taskbar-icon').forEach((icon) => {
+  document.querySelectorAll('.dock-item').forEach((icon) => {
     const win = document.getElementById(icon.dataset.window);
     if (!win) return;
     const isOpen = win.dataset.state === 'open' || win.dataset.state === 'minimized';
-    const isActive = activeWindowId === win.id && win.dataset.state === 'open';
     icon.classList.toggle('open', isOpen);
-    icon.classList.toggle('active', isActive);
   });
 }
 
@@ -604,324 +592,258 @@ function initializeTaskbarIcon(name) {
   });
 }
 
-// Welcome App: Explains each application in the OS to the user.
+/* ---------------------------------------------------------
+   APPLICATION: CHAMPIONS — F1 World Champions hall of fame
+   3-column table: Driver · Championships · Years crowned
+   Sorted by titles desc, then earliest title year asc.
+--------------------------------------------------------- */
 
-
-const appGuide = [
-  {
-    id: 'garage',
-    name: 'Garage',
-    eyebrow: 'APP 01 — COLLECTION MANAGEMENT',
-    tagline: 'Build, browse, and manage your car collection.',
-    body: `The Garage is where your collection lives. It starts with a single car, and grows
-      however you like — hand-build a custom entry with your own specs and notes, or browse a
-      preset collection of ten GT3 and GTE machines and add them with one click. Every car gets
-      its own spec card with power, weight, and top speed, plus room for your own notes on setup
-      and character.`,
-    windowId: 'garage'
-  },
-  {
-    id: 'lightsout',
-    name: 'Lights Out',
-    eyebrow: 'APP 02 — REACTION TRAINER',
-    tagline: 'Test your reflexes against a real F1 start sequence.',
-    body: `Five lights illuminate one by one, just like the start gantry at a real Grand Prix.
-      Jump the start and you'll be flagged before the lights even go out. Wait for all five to go
-      dark, then react as fast as you can — your time is measured in milliseconds and graded from
-      "Back to Karting" to "F1 Reflexes." Your personal best is saved between sessions.`,
-    windowId: 'lightsout'
-  }
+const CHAMPIONS = [
+  { name: 'Michael Schumacher',   titles: 7, years: [1994, 1995, 2000, 2001, 2002, 2003, 2004] },
+  { name: 'Lewis Hamilton',       titles: 7, years: [2008, 2014, 2015, 2017, 2018, 2019, 2020] },
+  { name: 'Juan Manuel Fangio',   titles: 5, years: [1951, 1954, 1955, 1956, 1957] },
+  { name: 'Alain Prost',          titles: 4, years: [1985, 1986, 1989, 1993] },
+  { name: 'Sebastian Vettel',     titles: 4, years: [2010, 2011, 2012, 2013] },
+  { name: 'Max Verstappen',       titles: 4, years: [2021, 2022, 2023, 2024] },
+  { name: 'Jack Brabham',         titles: 3, years: [1959, 1960, 1966] },
+  { name: 'Jackie Stewart',       titles: 3, years: [1969, 1971, 1973] },
+  { name: 'Niki Lauda',           titles: 3, years: [1975, 1977, 1984] },
+  { name: 'Nelson Piquet',        titles: 3, years: [1981, 1983, 1987] },
+  { name: 'Ayrton Senna',         titles: 3, years: [1988, 1990, 1991] },
+  { name: 'Alberto Ascari',       titles: 2, years: [1952, 1953] },
+  { name: 'Graham Hill',          titles: 2, years: [1962, 1968] },
+  { name: 'Jim Clark',            titles: 2, years: [1963, 1965] },
+  { name: 'Emerson Fittipaldi',   titles: 2, years: [1972, 1974] },
+  { name: 'Mika Häkkinen',        titles: 2, years: [1998, 1999] },
+  { name: 'Fernando Alonso',      titles: 2, years: [2005, 2006] },
+  { name: 'Giuseppe Farina',      titles: 1, years: [1950] },
+  { name: 'Mike Hawthorn',        titles: 1, years: [1958] },
+  { name: 'Phil Hill',            titles: 1, years: [1961] },
+  { name: 'John Surtees',         titles: 1, years: [1964] },
+  { name: 'Denny Hulme',          titles: 1, years: [1967] },
+  { name: 'Jochen Rindt',         titles: 1, years: [1970] },
+  { name: 'James Hunt',           titles: 1, years: [1976] },
+  { name: 'Mario Andretti',       titles: 1, years: [1978] },
+  { name: 'Jody Scheckter',       titles: 1, years: [1979] },
+  { name: 'Alan Jones',           titles: 1, years: [1980] },
+  { name: 'Keke Rosberg',         titles: 1, years: [1982] },
+  { name: 'Nigel Mansell',        titles: 1, years: [1992] },
+  { name: 'Damon Hill',           titles: 1, years: [1996] },
+  { name: 'Jacques Villeneuve',   titles: 1, years: [1997] },
+  { name: 'Kimi Räikkönen',       titles: 1, years: [2007] },
+  { name: 'Jenson Button',        titles: 1, years: [2009] },
+  { name: 'Nico Rosberg',         titles: 1, years: [2016] },
+  { name: 'Lando Norris',         titles: 1, years: [2025] }
 ];
 
-function buildGuideSidebar() {
-  const sidebar = document.getElementById('guide-sidebar');
-  sidebar.innerHTML = '';
+function buildChampionsTable() {
+  const display = document.getElementById('champions-display');
+  if (!display) return;
 
-  appGuide.forEach((app, index) => {
-    const entry = document.createElement('div');
-    entry.className = 'garage-entry';
-    entry.dataset.index = index;
-    entry.innerHTML = `
-      <span class="entry-number">APP ${String(index + 1).padStart(2, '0')}</span>
-      <div class="entry-name">${app.name}</div>
-      <div class="entry-class">${app.tagline}</div>
-    `;
-    entry.addEventListener('click', () => setGuideContent(index));
-    sidebar.appendChild(entry);
+  // Stable sort: most titles first, then earliest-crowned first.
+  const sorted = [...CHAMPIONS].sort((a, b) => {
+    if (b.titles !== a.titles) return b.titles - a.titles;
+    const aFirst = a.years[0] ?? Infinity;
+    const bFirst = b.years[0] ?? Infinity;
+    if (aFirst !== bFirst) return aFirst - bFirst;
+    return a.name.localeCompare(b.name);
   });
-}
 
-function setGuideContent(index) {
-  const app = appGuide[index];
-  const display = document.getElementById('guide-display');
+  const rowsHtml = sorted.map((c, i) => {
+    const yearsStr = c.years.length ? c.years.join(', ') : '\u2014';
+    const titlesChip = c.titles >= 3 ? 'champ-row--multi' : 'champ-row--single';
+    return `
+      <tr class="${titlesChip}">
+        <td class="champ-rank">${String(i + 1).padStart(2, '0')}</td>
+        <td class="champ-name">${c.name}</td>
+        <td class="champ-titles">${c.titles}</td>
+        <td class="champ-years">${yearsStr}</td>
+      </tr>`;
+  }).join('');
 
   display.innerHTML = `
-    <div class="display-eyebrow">${app.eyebrow}</div>
-    <h2 class="display-title">${app.name}</h2>
-    <div class="display-meta">${app.tagline}</div>
-    <p class="display-body">${app.body}</p>
-    <button class="btn-launch" id="guide-launch-btn">LAUNCH ${app.name.toUpperCase()} →</button>
+    <table class="champ-table">
+      <thead>
+        <tr>
+          <th class="champ-rank-head">RANK</th>
+          <th class="champ-name-head">DRIVER</th>
+          <th class="champ-titles-head">TITLES</th>
+          <th class="champ-years-head">YEARS</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
   `;
-
-  document.getElementById('guide-launch-btn').addEventListener('click', () => {
-    openWindow(document.getElementById(app.windowId));
-  });
-
-  document.querySelectorAll('#guide-sidebar .garage-entry').forEach((el) => {
-    el.classList.toggle('active', Number(el.dataset.index) === index);
-  });
 }
 
-function initializeGuideApp() {
-  buildGuideSidebar();
-  setGuideContent(0);
+function initializeChampionsApp() {
+  buildChampionsTable();
 }
 
 
-/* Application: Garage — A place where you can add cars with their specs and details. 
-(Since this is a small probject I hard coded it instead of using a database.) */
+/* ---------------------------------------------------------
+   APPLICATION: F1 QUIZ — 5 multiple-choice F1 trivia questions
+--------------------------------------------------------- */
 
-
-const garageCars = [
+const QUIZ_QUESTIONS = [
   {
-    title: "Ferrari 488 GT3 Evo",
-    date: "Acquired 2023",
-    class: "GT3 — Endurance",
-    specs: { power: "560 HP", weight: "1300 KG", topSpeed: "187 MPH" },
-    content: `The cornerstone of the collection. A naturally-aspirated-feeling twin-turbo V8 wrapped
-      in a chassis that forgives mistakes at the limit. Run in full Le Mans livery with a fresh
-      brake-by-wire setup installed ahead of the next endurance stint.`
+    text: 'Who was the first F1 World Champion?',
+    answer: 'Giuseppe Farina',
+    choices: ['Giuseppe Farina', 'Juan Manuel Fangio', 'Jim Clark', 'Graham Hill']
+  },
+  {
+    text: 'Who has the most wins in F1?',
+    answer: 'Lewis Hamilton',
+    choices: ['Lewis Hamilton', 'Fernando Alonso', 'Michael Schumacher', 'Max Verstappen']
+  },
+  {
+    text: 'Who has the most wins at Monaco?',
+    answer: 'Ayrton Senna',
+    choices: ['Ayrton Senna', 'Lewis Hamilton', 'Alain Prost', 'Michael Schumacher']
+  },
+  {
+    text: 'Which F1 team won the Constructors\u2019 Championship in 2009?',
+    answer: 'Brawn GP',
+    choices: ['Brawn GP', 'Ferrari', 'Mercedes', 'Red Bull']
+  },
+  {
+    text: 'Who won the Drivers\u2019 Championship in 1976?',
+    answer: 'James Hunt',
+    choices: ['James Hunt', 'Niki Lauda', 'Sebastian Vettel', 'Damon Hill']
   }
 ];
 
-const browseCollectionCars = [
-  {
-    title: "Porsche 911 RSR",
-    date: "Available now",
-    class: "GTE — Endurance",
-    specs: { power: "510 HP", weight: "1245 KG", topSpeed: "180 MPH" },
-    content: `Mid-engined despite the badge on the back. Famous for braking later than physics
-      seems to allow. A proven endurance weapon with a chassis that stays honest as the fuel load drops.`
-  },
-  {
-    title: "McLaren 720S GT3",
-    date: "Available now",
-    class: "GT3 — Sprint",
-    specs: { power: "570 HP", weight: "1290 KG", topSpeed: "183 MPH" },
-    content: `The sharpest steering in the class. Built for short, aggressive sprint races where
-      one good lap matters more than ten consistent ones.`
-  },
-  {
-    title: "Audi R8 LMS",
-    date: "Available now",
-    class: "GT3 — All-rounder",
-    specs: { power: "565 HP", weight: "1310 KG", topSpeed: "186 MPH" },
-    content: `Predictable, planted, and easy to trust in changing conditions — the default choice
-      for a wet practice session or a driver still learning a new circuit.`
-  },
-  {
-    title: "BMW M4 GT3",
-    date: "Available now",
-    class: "GT3 — All-rounder",
-    specs: { power: "590 HP", weight: "1300 KG", topSpeed: "184 MPH" },
-    content: `A front-engined GT3 that punches above its layout. Strong traction out of slow corners
-      makes it a favorite on tight, technical club circuits.`
-  },
-  {
-    title: "Mercedes-AMG GT3",
-    date: "Available now",
-    class: "GT3 — Endurance",
-    specs: { power: "550 HP", weight: "1285 KG", topSpeed: "182 MPH" },
-    content: `A big, torquey V8 wrapped around a chassis built for 24-hour races. Comfortable rather
-      than thrilling — exactly what you want at 4am in the rain.`
-  },
-  {
-    title: "Aston Martin Vantage GT3",
-    date: "Available now",
-    class: "GT3 — Sprint",
-    specs: { power: "580 HP", weight: "1280 KG", topSpeed: "185 MPH" },
-    content: `British bulldog styling with a bite to match. Aggressive on turn-in, and rewards a driver
-      willing to trail-brake deep into the apex.`
-  },
-  {
-    title: "Lamborghini Huracán GT3 Evo2",
-    date: "Available now",
-    class: "GT3 — Sprint",
-    specs: { power: "620 HP", weight: "1245 KG", topSpeed: "190 MPH" },
-    content: `The highest-revving V10 left in GT3. Loud, dramatic, and genuinely fast in the right hands —
-      less forgiving than most of the paddock.`
-  },
-  {
-    title: "Chevrolet Corvette Z06 GT3.R",
-    date: "Available now",
-    class: "GT3 — Endurance",
-    specs: { power: "545 HP", weight: "1300 KG", topSpeed: "181 MPH" },
-    content: `A naturally-aspirated flat-plane V8 with a soundtrack unlike anything else in the field.
-      Built tough for the long stints of an endurance campaign.`
-  },
-  {
-    title: "Ford Mustang GT3",
-    date: "Available now",
-    class: "GT3 — Sprint",
-    specs: { power: "560 HP", weight: "1295 KG", topSpeed: "183 MPH" },
-    content: `The newest name on this list, and already a giant-killer at Le Mans. Aggressive aero
-      package built specifically for high-speed stability.`
-  },
-  {
-    title: "Lexus RC F GT3",
-    date: "Available now",
-    class: "GT3 — All-rounder",
-    specs: { power: "540 HP", weight: "1300 KG", topSpeed: "180 MPH" },
-    content: `Quietly reliable and rarely the fastest car on paper, but a chassis that never seems to
-      put a wheel wrong when it matters most.`
+let quizIndex = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-];
-
-function buildGarageSidebar() {
-  const sidebar = document.getElementById('garage-sidebar');
-  sidebar.innerHTML = '';
-
-  garageCars.forEach((car, index) => {
-    const entry = document.createElement('div');
-    entry.className = 'garage-entry';
-    entry.dataset.index = index;
-    entry.innerHTML = `
-      <span class="entry-number">CAR ${String(index + 1).padStart(2, '0')}</span>
-      <div class="entry-name">${car.title}</div>
-      <div class="entry-class">${car.class}</div>
-    `;
-    entry.addEventListener('click', () => setContent(index));
-    sidebar.appendChild(entry);
-  });
-
-  document.getElementById('garage-count').textContent = garageCars.length;
+  return a;
 }
 
-function setContent(index) {
-  const car = garageCars[index];
-  const display = document.getElementById('garage-display');
-  if (!car) return;
+function quizRenderQuestion() {
+  const q = QUIZ_QUESTIONS[quizIndex];
+  const display = document.getElementById('quiz-display');
+  if (!display) return;
+
+  const total = QUIZ_QUESTIONS.length;
+  const progressPct = ((quizIndex) / total) * 100;
+
+  const choicesHtml = q.choices.map((c) => `
+    <button class="quiz-choice" data-choice="${c.replace(/"/g, '"')}">
+      <span class="quiz-choice-letter"></span>
+      <span class="quiz-choice-text">${c}</span>
+    </button>
+  `).join('');
 
   display.innerHTML = `
-    <div class="display-eyebrow">GARAGE.APP // CAR ${String(index + 1).padStart(2, '0')} OF ${String(garageCars.length).padStart(2, '0')}</div>
-    <h2 class="display-title">${car.title}</h2>
-    <div class="display-meta">${car.date} · ${car.class}</div>
-    <div class="display-specs">
-      <div class="spec-box">
-        <span class="spec-label">POWER</span>
-        <span class="spec-value">${car.specs.power}</span>
+    <div class="quiz-progress">
+      <div class="quiz-progress-meta">
+        <span class="quiz-progress-label">QUESTION ${quizIndex + 1} OF ${total}</span>
+        <span class="quiz-progress-score">SCORE ${quizScore}</span>
       </div>
-      <div class="spec-box">
-        <span class="spec-label">WEIGHT</span>
-        <span class="spec-value">${car.specs.weight}</span>
-      </div>
-      <div class="spec-box">
-        <span class="spec-label">TOP SPEED</span>
-        <span class="spec-value">${car.specs.topSpeed}</span>
+      <div class="quiz-progress-track">
+        <div class="quiz-progress-fill" style="width: ${progressPct}%"></div>
       </div>
     </div>
-    <p class="display-body">${car.content}</p>
+    <div class="quiz-card">
+      <h2 class="quiz-question">${q.text}</h2>
+      <div class="quiz-choices">${choicesHtml}</div>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <div class="quiz-actions">
+        <button class="quiz-next-btn" id="quiz-next-btn" hidden>NEXT QUESTION \u2192</button>
+      </div>
+    </div>
   `;
 
-  document.querySelectorAll('#garage-sidebar .garage-entry').forEach((el) => {
-    el.classList.toggle('active', Number(el.dataset.index) === index);
+  display.querySelectorAll('.quiz-choice').forEach((btn) => {
+    btn.addEventListener('click', () => quizHandleAnswer(btn));
   });
+
+  const nextBtn = document.getElementById('quiz-next-btn');
+  nextBtn.addEventListener('click', quizNext);
+
+  quizAnswered = false;
 }
 
-function initializeGarageApp() {
-  buildGarageSidebar();
-  setContent(0);
+function quizHandleAnswer(btn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  const q = QUIZ_QUESTIONS[quizIndex];
+  const chosen = btn.dataset.choice;
+  const isCorrect = chosen === q.answer;
+
+  document.querySelectorAll('#quiz-display .quiz-choice').forEach((c) => {
+    c.disabled = true;
+    const isAns = c.dataset.choice === q.answer;
+    c.classList.add(isAns ? 'quiz-choice--correct' : 'quiz-choice--dim');
+  });
+
+  if (!isCorrect) btn.classList.add('quiz-choice--wrong');
+
+  const feedback = document.getElementById('quiz-feedback');
+  feedback.classList.add(isCorrect ? 'feedback--good' : 'feedback--bad');
+  feedback.textContent = isCorrect
+    ? 'Nice. \u2714'
+    : 'Not quite \u2014 correct answer: ' + q.answer;
+
+  if (isCorrect) quizScore++;
+  document.getElementById('quiz-next-btn').hidden = false;
 }
 
-
-//  Application: Add a car: Custom Build or Browse Collection
-
-
-function initializeAddCarApp() {
-  const addCarBtn = document.getElementById('btn-add-car');
-  const addCarWindow = document.getElementById('addcar');
-
-  addCarBtn.addEventListener('click', () => {
-    renderBrowseGrid();
-    openWindow(addCarWindow);
-  });
-
-  document.querySelectorAll('.addcar-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.addcar-tab').forEach((t) => t.classList.remove('active'));
-      document.querySelectorAll('.addcar-panel').forEach((p) => p.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
-    });
-  });
-
-  document.getElementById('submit-custom-car').addEventListener('click', () => {
-    const name = document.getElementById('input-name').value.trim();
-    const carClass = document.getElementById('input-class').value;
-    const power = document.getElementById('input-power').value.trim();
-    const weight = document.getElementById('input-weight').value.trim();
-    const topSpeed = document.getElementById('input-topspeed').value.trim();
-    const notes = document.getElementById('input-notes').value.trim();
-
-    if (!name) {
-      document.getElementById('input-name').focus();
-      return;
-    }
-
-    const newCar = {
-      title: name,
-      date: 'Custom build',
-      class: carClass,
-      specs: {
-        power: power ? `${power} HP` : '— HP',
-        weight: weight ? `${weight} KG` : '— KG',
-        topSpeed: topSpeed ? `${topSpeed} MPH` : '— MPH'
-      },
-      content: notes || 'No setup notes recorded yet for this build.'
-    };
-
-    garageCars.push(newCar);
-    buildGarageSidebar();
-    setContent(garageCars.length - 1);
-
-    document.getElementById('input-name').value = '';
-    document.getElementById('input-power').value = '';
-    document.getElementById('input-weight').value = '';
-    document.getElementById('input-topspeed').value = '';
-    document.getElementById('input-notes').value = '';
-
-    closeWindowFull(addCarWindow);
-    openWindow(document.getElementById('garage'));
-  });
-}
-
-function renderBrowseGrid() {
-  const grid = document.getElementById('browse-grid');
-  grid.innerHTML = '';
-
-  if (browseCollectionCars.length === 0) {
-    grid.innerHTML = '<div class="browse-empty">Every car in the collection is already in your garage.</div>';
-    return;
+function quizNext() {
+  quizIndex++;
+  if (quizIndex >= QUIZ_QUESTIONS.length) {
+    quizRenderResult();
+  } else {
+    quizRenderQuestion();
   }
+}
 
-  browseCollectionCars.forEach((car, index) => {
-    const card = document.createElement('div');
-    card.className = 'browse-card';
-    card.innerHTML = `
-      <span class="browse-card-class">${car.class}</span>
-      <span class="browse-card-name">${car.title}</span>
-      <span class="browse-card-specs">${car.specs.power} · ${car.specs.weight} · ${car.specs.topSpeed}</span>
-      <button class="browse-card-add">+ ADD TO GARAGE</button>
-    `;
-    card.querySelector('.browse-card-add').addEventListener('click', () => {
-      const [added] = browseCollectionCars.splice(index, 1);
-      garageCars.push(added);
-      buildGarageSidebar();
-      setContent(garageCars.length - 1);
-      renderBrowseGrid();
-    });
-    grid.appendChild(card);
+function quizRenderResult() {
+  const total = QUIZ_QUESTIONS.length;
+  const pct = Math.round((quizScore / total) * 100);
+  const display = document.getElementById('quiz-display');
+
+  let rating = 'Back to karting';
+  if (pct === 100) rating = 'OG Fan';
+  else if (pct >= 80) rating = 'Normal Fan';
+  else if (pct >= 60) rating = 'New Fan';
+  else if (pct >= 40) rating = 'Rookie';
+
+  display.innerHTML = `
+    <div class="quiz-card quiz-card--result">
+      <span class="result-eyebrow">QUIZ COMPLETE</span>
+      <h2 class="result-title">${quizScore} / ${total}</h2>
+      <p class="result-rating">${rating}</p>
+      <p class="result-percent">${pct}% correct</p>
+      <button class="btn-primary quiz-restart" id="quiz-restart">PLAY AGAIN</button>
+    </div>
+  `;
+
+  document.getElementById('quiz-restart').addEventListener('click', () => {
+    quizIndex = 0;
+    quizScore = 0;
+    quizRenderQuestion();
   });
+}
+
+function initializeQuizApp() {
+  // Shuffle choices once so the correct answer position varies between rounds.
+  QUIZ_QUESTIONS.forEach((q) => {
+    const correct = q.answer;
+    q.choices = shuffleArray(q.choices);
+    q.answer = correct;
+  });
+  quizIndex = 0;
+  quizScore = 0;
+  quizRenderQuestion();
 }
 
 
@@ -961,7 +883,7 @@ function loStartSequence() {
 
   const startBtn = document.getElementById('lo-start-btn');
   startBtn.disabled = true;
-  startBtn.textContent = 'SEQUENCE RUNNING...';
+  startBtn.textContent = 'Running...';
 
   const lights = document.querySelectorAll('.lo-light');
 
@@ -990,11 +912,11 @@ function loStartSequence() {
 }
 
 function loGradeFor(ms) {
-  if (ms < 180) return { label: 'F1 REFLEXES', cls: 'grade-elite' };
-  if (ms < 230) return { label: 'PRO PACE', cls: 'grade-pro' };
-  if (ms < 300) return { label: 'RACE READY', cls: 'grade-good' };
-  if (ms < 450) return { label: 'ROOKIE', cls: 'grade-avg' };
-  return { label: 'BACK TO KARTING', cls: 'grade-slow' };
+  if (ms < 180) return { label: 'Pro', cls: 'grade-elite' };
+  if (ms < 230) return { label: 'Pro-Amature', cls: 'grade-pro' };
+  if (ms < 300) return { label: 'Amature', cls: 'grade-good' };
+  if (ms < 450) return { label: 'Rookie', cls: 'grade-avg' };
+  return { label: 'Old Man', cls: 'grade-slow' };
 }
 
 function loShowResult(ms) {
@@ -1087,20 +1009,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Windows
   initializeWindow('welcome');
-  initializeWindow('garage');
-  initializeWindow('addcar');
   initializeWindow('lightsout');
+  initializeWindow('champions');
+  initializeWindow('quiz');
 
   // Taskbar icons
   initializeTaskbarIcon('welcome');
-  initializeTaskbarIcon('garage');
   initializeTaskbarIcon('lightsout');
+  initializeTaskbarIcon('champions');
+  initializeTaskbarIcon('quiz');
 
   // App-specific dynamic content
-  initializeGuideApp();
-  initializeGarageApp();
-  initializeAddCarApp();
   initializeLightsOutApp();
+  initializeChampionsApp();
+  initializeQuizApp();
 
   topBar.style.zIndex = biggestIndex + 1;
   updateTaskbar();
