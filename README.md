@@ -1,6 +1,6 @@
-# RaceOS
+# FormulaOS
 
-RaceOS is a browser-based operating system built with HTML, CSS, and JavaScript. It is designed around a motorsport theme with specilized features built for it's theme.
+FormulaOS is a browser-based operating system built with HTML, CSS, and JavaScript. It is designed around a motorsport theme with specilized features built for it's theme.
 
 ## Features
 
