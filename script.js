@@ -9,7 +9,6 @@ const TASKBAR_H = 78;
 const windowMeta = {};
 
 // Clock
-
 function updateClock() {
   const now = new Date();
   let h = now.getHours();
@@ -29,10 +28,7 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
-// 2026 F1 Season Schedule, for the countdown timer
-
 const F1_2026_SCHEDULE = [
-  // Round 1: Australia (Melbourne) UTC+11 (AEDT)
   { round: 1, track: 'Albert Park', country: 'Australia', tz: '+11:00', gpName: 'AUSTRALIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-03-07T12:30:00+11:00' },
@@ -41,7 +37,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-03-08T16:00:00+11:00' },
       { name: 'GRAND PRIX', date: '2026-03-09T15:00:00+11:00' }
   ]},
-  // Round 2: China (Shanghai) Sprint UTC+8
   { round: 2, track: 'Shanghai', country: 'China', tz: '+08:00', gpName: 'CHINESE GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-03-14T12:30:00+08:00' },
@@ -50,7 +45,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-03-15T16:00:00+08:00' },
       { name: 'GRAND PRIX', date: '2026-03-16T15:00:00+08:00' }
   ]},
-  // Round 3: Japan (Suzuka) UTC+9
   { round: 3, track: 'Suzuka', country: 'Japan', tz: '+09:00', gpName: 'JAPANESE GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-03-28T12:30:00+09:00' },
@@ -59,7 +53,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-03-29T16:00:00+09:00' },
       { name: 'GRAND PRIX', date: '2026-03-30T15:00:00+09:00' }
   ]},
-  // Round 4: Miami SPRINT UTC-4 (EDT)
   { round: 4, track: 'Miami', country: 'USA', tz: '-04:00', gpName: 'MIAMI GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-05-02T12:30:00-04:00' },
@@ -68,7 +61,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-05-03T16:00:00-04:00' },
       { name: 'GRAND PRIX', date: '2026-05-04T15:00:00-04:00' }
   ]},
-  // Round 5: Canada (Montreal) UTC-4 (EDT)
   { round: 5, track: 'Montreal', country: 'Canada', tz: '-04:00', gpName: 'CANADIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-05-23T12:30:00-04:00' },
@@ -77,7 +69,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-05-24T16:00:00-04:00' },
       { name: 'GRAND PRIX', date: '2026-05-25T15:00:00-04:00' }
   ]},
-  // Round 6: Monaco UTC+2 (CEST)
   { round: 6, track: 'Monaco', country: 'Monaco', tz: '+02:00', gpName: 'MONACO GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-06-05T12:30:00+02:00' },
@@ -86,7 +77,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-06-06T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-06-07T15:00:00+02:00' }
   ]},
-  // Round 7: Spain (Barcelona) UTC+2 (CEST)
   { round: 7, track: 'Barcelona', country: 'Spain', tz: '+02:00', gpName: 'SPANISH GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-06-12T12:30:00+02:00' },
@@ -95,7 +85,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-06-13T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-06-14T15:00:00+02:00' }
   ]},
-  // Round 8: Austria (Spielberg) Sprint UTC+2 (CEST)
   { round: 8, track: 'Spielberg', country: 'Austria', tz: '+02:00', gpName: 'AUSTRIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-06-26T12:30:00+02:00' },
@@ -104,7 +93,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-06-27T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-06-28T15:00:00+02:00' }
   ]},
-  // Round 9: Great Britain (Silverstone) Sprint  UTC+1 (BST)
   { round: 9, track: 'Silverstone', country: 'Great Britain', tz: '+01:00', gpName: 'BRITISH GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-07-03T12:30:00+01:00' },
@@ -113,7 +101,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-07-04T16:00:00+01:00' },
       { name: 'GRAND PRIX', date: '2026-07-05T15:00:00+01:00' }
   ]},
-  //Round 10: Belgium (Spa) Sprint UTC+2 (CEST) 
   { round: 10, track: 'Spa', country: 'Belgium', tz: '+02:00', gpName: 'BELGIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-07-17T12:30:00+02:00' },
@@ -122,7 +109,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-07-18T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-07-19T15:00:00+02:00' }
   ]},
-  // Round 11: Hungary (Budapest) UTC+2 (CEST)
   { round: 11, track: 'Budapest', country: 'Hungary', tz: '+02:00', gpName: 'HUNGARIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-07-24T12:30:00+02:00' },
@@ -131,7 +117,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-07-25T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-07-26T15:00:00+02:00' }
   ]},
-  // Round 12: Netherlands (Zandvoort) UTC+2 (CEST)
   { round: 12, track: 'Zandvoort', country: 'Netherlands', tz: '+02:00', gpName: 'DUTCH GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-08-21T12:30:00+02:00' },
@@ -140,7 +125,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-08-22T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-08-23T15:00:00+02:00' }
   ]},
-  // Round 13: Italy (Monza)UTC+2 (CEST)
   { round: 13, track: 'Monza', country: 'Italy', tz: '+02:00', gpName: 'ITALIAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-09-04T12:30:00+02:00' },
@@ -149,7 +133,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-09-05T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-09-06T15:00:00+02:00' }
   ]},
-  // Round 14: Spain (Madrid street) UTC+2 (CEST)
   { round: 14, track: 'Madrid', country: 'Spain', tz: '+02:00', gpName: 'MADRID GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-09-11T12:30:00+02:00' },
@@ -158,7 +141,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-09-12T16:00:00+02:00' },
       { name: 'GRAND PRIX', date: '2026-09-13T15:00:00+02:00' }
   ]},
-  // Round 15: Azerbaijan (Baku) UTC+4
   { round: 15, track: 'Baku', country: 'Azerbaijan', tz: '+04:00', gpName: 'AZERBAIJAN GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-09-24T12:30:00+04:00' },
@@ -167,7 +149,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-09-25T16:00:00+04:00' },
       { name: 'GRAND PRIX', date: '2026-09-26T15:00:00+04:00' }
   ]},
-  // Round 16: Singapore UTC+8 (night race)
   { round: 16, track: 'Singapore', country: 'Singapore', tz: '+08:00', gpName: 'SINGAPORE GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-10-09T12:30:00+08:00' },
@@ -176,7 +157,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-10-10T16:00:00+08:00' },
       { name: 'GRAND PRIX', date: '2026-10-11T15:00:00+08:00' }
   ]},
-  // Round 17: USA (COTA Austin) Sprint UTC-5 (CDT)
   { round: 17, track: 'Austin', country: 'USA', tz: '-05:00', gpName: 'UNITED STATES GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-10-23T12:30:00-05:00' },
@@ -185,7 +165,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-10-24T16:00:00-05:00' },
       { name: 'GRAND PRIX', date: '2026-10-25T15:00:00-05:00' }
   ]},
-  // Round 18: Mexico (Mexico City) UTC-6 (CST)
   { round: 18, track: 'Mexico City', country: 'Mexico', tz: '-06:00', gpName: 'MEXICO CITY GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-10-30T12:30:00-06:00' },
@@ -194,7 +173,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-10-31T16:00:00-06:00' },
       { name: 'GRAND PRIX', date: '2026-11-01T15:00:00-06:00' }
   ]},
-  // Round 19: Brazil (Sao Paulo) Sprint UTC-3 (BRT)
   { round: 19, track: 'Interlagos', country: 'Brazil', tz: '-03:00', gpName: 'SAO PAULO GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-11-06T12:30:00-03:00' },
@@ -203,7 +181,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-11-07T16:00:00-03:00' },
       { name: 'GRAND PRIX', date: '2026-11-08T15:00:00-03:00' }
   ]},
-  // Round 20: Las Vegas UTC-8 (PST, night race)
   { round: 20, track: 'Las Vegas', country: 'USA', tz: '-08:00', gpName: 'LAS VEGAS GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-11-19T12:30:00-08:00' },
@@ -212,7 +189,6 @@ const F1_2026_SCHEDULE = [
       { name: 'QUALIFYING', date: '2026-11-20T16:00:00-08:00' },
       { name: 'GRAND PRIX', date: '2026-11-21T15:00:00-08:00' }
   ]},
-  // Round 21: Qatar (Lusail) Sprint UTC+3
   { round: 21, track: 'Lusail', country: 'Qatar', tz: '+03:00', gpName: 'QATAR GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-11-27T12:30:00+03:00' },
@@ -221,7 +197,6 @@ const F1_2026_SCHEDULE = [
       { name: 'GP QUALIFYING', date: '2026-11-28T16:00:00+03:00' },
       { name: 'GRAND PRIX', date: '2026-11-29T15:00:00+03:00' }
   ]},
-  // Round 22: Abu Dhabi UTC+4
   { round: 22, track: 'Abu Dhabi', country: 'UAE', tz: '+04:00', gpName: 'ABU DHABI GP',
     sessions: [
       { name: 'FREE PRACTICE 1', date: '2026-12-04T12:30:00+04:00' },
@@ -274,8 +249,6 @@ function updateCountdown() {
 }
 updateCountdown();
 setInterval(updateCountdown, 1000);
-
-// Track Wallpaper:
 
 const TRACK_SVGS = {
   'Albert Park': `<path class="track-ribbon" d="M400,280 C300,270 200,280 150,340 C120,380 140,450 200,500 L300,500 C260,470 240,430 270,400 L280,310 L400,310 C430,280 440,250 400,280 Z"/>
@@ -370,8 +343,6 @@ const TRACK_SVGS = {
 function applyTrackWallpaper(trackName) { /* deprecated — kept as a no-op */ }
 function initializeTrackWallpaper() { /* deprecated — wallpaper is now static */ }
 
-// Start OS screen
-
 function initializeIgnition() {
   const igniteBtn = document.getElementById('ignition-btn');
   const ignitionScreen = document.getElementById('ignition-screen');
@@ -408,8 +379,6 @@ function finishIgnition(format) {
 
   openWindow(document.getElementById('welcome'));
 }
-
-// Window management
 
 function bringToFront(win) {
   biggestIndex += 1;
@@ -467,8 +436,6 @@ function toggleMaximizeWindow(win) {
   bringToFront(win);
 }
 
-// Window handling
-
 function handleWindowTap(win) {
   bringToFront(win);
 }
@@ -476,8 +443,6 @@ function handleWindowTap(win) {
 function addWindowTapHandling(win) {
   win.addEventListener('mousedown', () => handleWindowTap(win));
 }
-
-// Dragging windows:
 
 function dragElement(win, header) {
   let offsetX = 0, offsetY = 0;
@@ -499,8 +464,7 @@ function dragElement(win, header) {
   function dragMouseMove(e) {
     e.preventDefault();
 
-    // Dragging exits the maximized state so the window becomes freely movable again.
-    const meta = windowMeta[win.id];
+const meta = windowMeta[win.id];
     if (meta && meta.maximized) {
       meta.maximized = false;
       win.style.width = meta.prevRect ? meta.prevRect.width : win.style.width;
@@ -523,8 +487,6 @@ function dragElement(win, header) {
     document.removeEventListener('mouseup', dragMouseUp);
   }
 }
-
-// Window controls:
 
 function enableWindowControls(win) {
   const minBtn = win.querySelector('.btn-minimize');
@@ -557,9 +519,6 @@ function initializeWindow(windowName) {
   enableWindowControls(win);
 }
 
-// Taskbar
-
-
 function updateTaskbar() {
   document.querySelectorAll('.dock-item').forEach((icon) => {
     const win = document.getElementById(icon.dataset.window);
@@ -591,12 +550,6 @@ function initializeTaskbarIcon(name) {
     updateTaskbar();
   });
 }
-
-/* ---------------------------------------------------------
-   APPLICATION: CHAMPIONS — F1 World Champions hall of fame
-   3-column table: Driver · Championships · Years crowned
-   Sorted by titles desc, then earliest title year asc.
---------------------------------------------------------- */
 
 const CHAMPIONS = [
   { name: 'Michael Schumacher',   titles: 7, years: [1994, 1995, 2000, 2001, 2002, 2003, 2004] },
@@ -640,7 +593,6 @@ function buildChampionsTable() {
   const display = document.getElementById('champions-display');
   if (!display) return;
 
-  // Stable sort: most titles first, then earliest-crowned first.
   const sorted = [...CHAMPIONS].sort((a, b) => {
     if (b.titles !== a.titles) return b.titles - a.titles;
     const aFirst = a.years[0] ?? Infinity;
@@ -680,10 +632,6 @@ function initializeChampionsApp() {
   buildChampionsTable();
 }
 
-
-/* ---------------------------------------------------------
-   APPLICATION: F1 QUIZ — 5 multiple-choice F1 trivia questions
---------------------------------------------------------- */
 
 const QUIZ_QUESTIONS = [
   {
@@ -835,7 +783,6 @@ function quizRenderResult() {
 }
 
 function initializeQuizApp() {
-  // Shuffle choices once so the correct answer position varies between rounds.
   QUIZ_QUESTIONS.forEach((q) => {
     const correct = q.answer;
     q.choices = shuffleArray(q.choices);
@@ -847,10 +794,7 @@ function initializeQuizApp() {
 }
 
 
-// Application: LIGHTS OUT — F1-style reaction time tester
-
-
-let loState = 'idle';       // idle | armed | waiting | go | result | falseStart
+let loState = 'idle';
 let loTimers = [];
 let loGoTimestamp = 0;
 let loBest = null;
@@ -962,7 +906,6 @@ function loHandleRigClick() {
   const startBtn = document.getElementById('lo-start-btn');
 
   if (loState === 'armed' || loState === 'waiting') {
-    // Clicked before the lights went out — false start.
     loClearTimers();
     loClearLights();
     loState = 'falseStart';
@@ -999,30 +942,56 @@ function initializeLightsOutApp() {
   loRenderHistory();
 }
 
-// Boot up:
+const CARS_2026 = [
+  { name: 'Alpine',       src: 'Cars/Alpine.webp' },
+  { name: 'Aston Martin', src: 'Cars/Aston%20Martin.jpg' },
+  { name: 'Audi',         src: 'Cars/Audi.jpg' },
+  { name: 'Cadillac',     src: 'Cars/Cadillac.webp' },
+  { name: 'Ferrari',      src: 'Cars/Ferrari.jpg' },
+  { name: 'Haas',         src: 'Cars/Haas.webp' },
+  { name: 'McLaren',      src: 'Cars/McLaren.jpg' },
+  { name: 'Mercedes',     src: 'Cars/Mercedes.webp' },
+  { name: 'Racing Bulls', src: 'Cars/Racing%20Bulls.jpg' },
+  { name: 'RedBull',      src: 'Cars/RedBull.jpeg' },
+  { name: 'Williams',     src: 'Cars/Williams.webp' }
+];
+
+function buildCarsGrid() {
+  const grid = document.getElementById('cars-grid');
+  if (!grid) return;
+  grid.innerHTML = CARS_2026.map((c) => `
+    <figure class="cars-cell">
+      <img src="${c.src}" alt="${c.name}" class="cars-img">
+      <figcaption class="cars-name">${c.name}</figcaption>
+    </figure>`).join('');
+}
+
+function initializeCarsApp() {
+  buildCarsGrid();
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeIgnition();
-
-  // Track wallpaper — set to the circuit of the next session
   initializeTrackWallpaper();
 
-  // Windows
   initializeWindow('welcome');
   initializeWindow('lightsout');
   initializeWindow('champions');
   initializeWindow('quiz');
+  initializeWindow('calendar');
+  initializeWindow('cars');
 
-  // Taskbar icons
   initializeTaskbarIcon('welcome');
   initializeTaskbarIcon('lightsout');
   initializeTaskbarIcon('champions');
   initializeTaskbarIcon('quiz');
+  initializeTaskbarIcon('calendar');
+  initializeTaskbarIcon('cars');
 
-  // App-specific dynamic content
   initializeLightsOutApp();
   initializeChampionsApp();
   initializeQuizApp();
+  initializeCarsApp();
 
   topBar.style.zIndex = biggestIndex + 1;
   updateTaskbar();

@@ -1,17 +1,31 @@
-# FormulaOS
+# **FormulaOS**
+An operating system (os) that can run on your browser. This webOS features a unique theme of Formula 1 fueled by my love for the sport.
 
-FormulaOS is a browser-based operating system built with HTML, CSS, and JavaScript. It is designed around a motorsport theme with specilized features built for it's theme.
+## User Instructions:
+Prerequiste: To be able to use FormulaOS all you need is stable internet connection and a browser. 
+To access the OS on your browser go to: https://spiffy-youtiao-905629.netlify.app/
 
-## Features
 
-* Browser-based desktop environment
-* Draggable windows
-* Desktop application icons
-* Live clock
-* A countdown to the next session in F1(Practice, Qualyfying, Grand Prix, etc.)
+## Apps: FormulaOS features the following applications
+- Welcome: This app just has a message to welcome users.
+- Lights out: A fun game that test's your reation time. Wait for all 5 lights to go out and click inside the box as fast as possible. Or hold and release after the lights go out. 
+- F1 Quiz: A 5 question quiz that test's your knowledge about Formula 1.
+- Champions: A table that shows every world champion in the history of Formula 1.
+- F1 2026 Calendar: Shows the dates of every race weekend in the 2026 F1 season.
+- 2026 F1 Cars: Shows pictures of all 11 cars constructed by F1 teams for the 2026 season.
 
-## Applications
+## Features:
+- To start the OS you press a button saying "Start FormulaOS" it was designed this way for it to look like pressing the "Start Engine" button in a real car.
+- The OS features an option to pick a 12-hour/24-hour clock prompted after clicking the "Start OS" button.
+- At the top right of the screen under the time is the countdown to the next F1 session.
 
-* Welcome: Introduces the user to all the applications.
-* Garage: The user can add cars to it's virtual collection by entering custom values or by selecting pre-made options.
-* Lights Out: A fun application designed to test the user's reaction time in a motorsport fasion.
+## Credits:
+- thf.com for providing pictures of F1 cars
+- motorposrtmagazine.cdn.net for providing pictures of F1 cars
+- assets.astonmartinf1.com for providing pictures of F1 cars
+- cdn-7.motorsport.com for providing pictures of F1 cars
+- racetrackmasters.com for providing pictures of F1 cars
+- nationalworld.com for providing pictures of F1 cars
+- static.independent.co.uk for providing pictures of F1 cars
+- at.headtopics.com for providing pictures of F1 cars
+- corp.formula1.com for providing a picture of the 2026 F1 calendar

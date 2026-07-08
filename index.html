@@ -37,11 +37,9 @@
         <h2 class="format-title">Set your clock format: </h2>
         <div class="format-options">
           <button class="format-btn" data-format="12">
-            <span class="format-btn-time">7:04 PM</span>
             <span class="format-btn-label">12-HOUR</span>
           </button>
           <button class="format-btn" data-format="24">
-            <span class="format-btn-time">19:04</span>
             <span class="format-btn-label">24-HOUR</span>
           </button>
         </div>
@@ -96,14 +94,20 @@
     </div>
     <div class="windowcontent welcome-body">
       <div class="welcome-message">
-        <p>FormulaOS is an Operating System that runs on the web and is built around the theme of Formula 1. I made it with this theme due to my love for the sport. Check out the apps I created!</p>
-        <p>Also the wallpaper featured the Mercedes driver doing the famous T pose during the 2025 F1 intro.</p>
+        <p>FormulaOS is an Operating System that runs on a browser and is built around the theme of Formula 1. I made it with this theme due to my love for the sport.</p>
+        <p>The wallpaper features the Mercedes driver, George Russel doing the famous T-Pose during the 2025 F1 intro.</p>
+        <p>Apps:</p>
+        <p>F1 Quiz: A 5 question quiz that tests your knowledge about Formula 1.</p>
+        <p>Lights Out: A game that tests your reation time in a motorsport fashion.</p>
+        <p>Champions: A table showing all 35 F1 world champions.</p>
+        <p>F1 2026 Calendar: A visual calendar of the 2026 F1 season.</p>
+        <p>2026 F1 Cars: A showcase of every car on the 2026 grid.</p>
       </div>
     </div>
   </section>
 
   <!-- Garage-->
-  <!-- ===================== WINDOW: F1 QUIZ ===================== -->
+  <!-- WINDOW: F1 QUIZ -->
   <section class="window" id="quiz">
     <div class="windowheader" id="quizheader">
       <span class="headertext">F1 Quiz</span>
@@ -182,7 +186,7 @@
     </div>
   </section>
 
-  <!-- ===================== WINDOW: CHAMPIONS ===================== -->
+  <!--WINDOW: CHAMPIONS-->
   <section class="window" id="champions">
     <div class="windowheader" id="championsheader">
       <span class="headertext">Champions</span>
@@ -200,6 +204,52 @@
     </div>
     <div class="windowcontent champions-body">
       <div id="champions-display" class="champions-display"></div>
+    </div>
+  </section>
+
+  <section class="window" id="calendar">
+    <div class="windowheader" id="calendarheader">
+      <span class="headertext">F1 2026 Calendar</span>
+      <div class="windowcontrols">
+        <button class="winctrl btn-minimize" title="Minimize" data-target="calendar">
+          <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-maximize" title="Maximize" data-target="calendar">
+          <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-close" title="Close" data-target="calendar">
+          <svg viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="windowcontent calendar-body">
+      <div class="calendar-scroll">
+        <img src="Formula-1-2026.webp" alt="F1 2026 Calendar" class="calendar-img">
+      </div>
+    </div>
+  </section>
+
+  <section class="window" id="cars">
+    <div class="windowheader" id="carsheader">
+      <span class="headertext">2026 F1 Cars</span>
+      <div class="windowcontrols">
+        <button class="winctrl btn-minimize" title="Minimize" data-target="cars">
+          <svg viewBox="0 0 12 12"><line x1="2" y1="9" x2="10" y2="9" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-maximize" title="Maximize" data-target="cars">
+          <svg viewBox="0 0 12 12"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+        <button class="winctrl btn-close" title="Close" data-target="cars">
+          <svg viewBox="0 0 12 12"><line x1="2.5" y1="2.5" x2="9.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/><line x1="9.5" y1="2.5" x2="2.5" y2="9.5" stroke="currentColor" stroke-width="1.6"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="windowcontent cars-body">
+      <div class="cars-header-bar">
+        <span>2026 F1 Cars</span>
+      </div>
+      <p class="cars-intro">These are the 11 cars that are racing in the 2026 F1 season.</p>
+      <div id="cars-grid" class="cars-grid"></div>
     </div>
   </section>
 
@@ -249,6 +299,33 @@
       </svg>
     </div>
     <span class="dock-tooltip">Champions</span>
+  </button>
+
+  <button class="dock-item dock-calendar" id="icon-calendar" data-window="calendar" title="F1 2026 Calendar">
+    <div class="dock-icon">
+      <svg viewBox="0 0 64 64" class="dock-glyph" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="10" y="16" width="44" height="38" rx="4"/>
+        <line x1="10" y1="28" x2="54" y2="28"/>
+        <line x1="20" y1="10" x2="20" y2="22"/>
+        <line x1="44" y1="10" x2="44" y2="22"/>
+        <line x1="22" y1="38" x2="30" y2="38"/>
+        <line x1="34" y1="38" x2="42" y2="38"/>
+        <line x1="22" y1="46" x2="30" y2="46"/>
+        <line x1="34" y1="46" x2="42" y2="46"/>
+      </svg>
+    </div>
+    <span class="dock-tooltip">F1 2026 Calendar</span>
+  </button>
+
+  <button class="dock-item dock-cars" id="icon-cars" data-window="cars" title="2026 F1 Cars">
+    <div class="dock-icon">
+      <svg viewBox="0 0 64 64" class="dock-glyph" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 36 L14 36 L18 26 L46 26 L50 36 L58 36 L58 42 L52 42 L52 46 L48 46 L48 42 L16 42 L16 46 L12 46 L12 42 L6 42 Z"/>
+        <circle cx="16" cy="46" r="4"/>
+        <circle cx="48" cy="46" r="4"/>
+      </svg>
+    </div>
+    <span class="dock-tooltip">2026 F1 Cars</span>
   </button>
 </nav>
 
