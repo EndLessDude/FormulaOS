@@ -258,7 +258,7 @@ button, input, select, textarea {
   position: absolute;
   top: calc(var(--topbar-h) + 10px);
   right: 12px;
-  padding: 10px 14px;
+  padding: 14px 20px;
   background: var(--panel);
   border: 1px solid var(--border);
   text-align: right;
@@ -266,21 +266,21 @@ button, input, select, textarea {
 }
 
 .countdown-eyebrow {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 1px;
   color: var(--cyan);
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 }
 
 .countdown-session {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .countdown-clock {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   justify-content: flex-end;
 }
 
@@ -292,15 +292,16 @@ button, input, select, textarea {
 
 .countdown-unit span {
   font-family: 'Courier New', monospace;
-  font-size: 17px;
+  font-size: 32px;
   font-weight: bold;
+  line-height: 1;
 }
 
 .countdown-unit label {
-  font-size: 8px;
+  font-size: 10px;
   color: var(--text-dim);
   letter-spacing: 1px;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 #taskbar {
